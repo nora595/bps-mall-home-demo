@@ -347,8 +347,11 @@ body:not(.anno) .opt-flag{display:none}
 .lc-tab:hover{color:var(--teal-deep);background:var(--mint-soft)}
 .lc-tab.cur{background:var(--mint);color:#fff;font-weight:600}
 .lc-tab .c{font-size:10px;opacity:.75}
-.list-workbench{display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px;align-items:start;margin-top:18px}
-.filter-sidebar{position:sticky;top:16px;border:1px solid #E7E9E9;border-radius:8px;background:#fff;box-shadow:0 5px 18px rgba(24,55,52,.05);overflow:hidden}
+.list-workbench{display:grid;grid-template-columns:minmax(0,1fr);gap:0;align-items:start;margin-top:18px;transition:grid-template-columns .2s,gap .2s}
+.list-workbench.filter-open{grid-template-columns:230px minmax(0,1fr);gap:24px}
+.filter-sidebar{display:none;position:sticky;top:16px;border:1px solid #E7E9E9;border-radius:8px;background:#fff;box-shadow:0 5px 18px rgba(24,55,52,.05);overflow:hidden;animation:sidePanelIn .2s ease-out}
+.list-workbench.filter-open .filter-sidebar{display:block}
+@keyframes sidePanelIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
 .filter-side-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #EEF0F0;font-size:14px;font-weight:600;color:#242424}
 .filter-side-hd .selected-count{min-width:20px;height:20px;border-radius:10px;background:var(--mint);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
 .filter-side-hd .selected-count:empty{display:none}
@@ -377,6 +380,12 @@ body:not(.anno) .opt-flag{display:none}
 .f-swatch{display:inline-block;width:12px;height:12px;border:1px solid rgba(0,0,0,.12);border-radius:2px;vertical-align:-2px;margin-right:5px}
 .list-results{min-width:0}
 .sortbar{display:flex;align-items:center;gap:4px;padding:0 0 10px;border-bottom:1px dashed #F0F0F0}
+.btn-filter{display:inline-flex;align-items:center;gap:6px;height:31px;margin-left:12px;padding:0 14px;border:1px solid #DDE2E1;border-radius:16px;background:#fff;color:#4C5554;font-size:12px;transition:.15s}
+.btn-filter:hover,.btn-filter.on{border-color:var(--mint);color:var(--teal-deep);background:var(--mint-soft)}
+.btn-filter.on{font-weight:600}
+.btn-filter svg{width:13px;height:13px}
+.btn-filter b{min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:var(--mint);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px}
+.btn-filter .caret{font-size:9px;font-style:normal;opacity:.7}
 .s-op{padding:5px 14px;border-radius:4px;font-size:12.5px;color:#4A4A4A;cursor:pointer;display:flex;align-items:center;gap:3px;transition:.13s}
 .s-op:hover{color:var(--teal-deep)}
 .s-op.cur{background:var(--mint);color:#fff;font-weight:600}
@@ -387,7 +396,8 @@ body:not(.anno) .opt-flag{display:none}
 .a-chip .x{cursor:pointer;font-weight:700}
 .a-clear{font-size:11.5px;color:var(--hint);cursor:pointer;text-decoration:underline}
 .a-clear:hover{color:var(--teal-deep)}
-.list-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 5px;margin-top:14px}
+.list-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px 5px;margin-top:14px}
+.list-workbench.filter-open .list-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 .empty{padding:70px 0;text-align:center;color:var(--hint)}
 .empty svg{width:70px;height:56px;opacity:.35;margin-bottom:12px}
 .pager{display:flex;justify-content:center;align-items:center;gap:6px;margin:34px 0 8px}
@@ -543,15 +553,17 @@ body.anno .anno-chip{display:inline-flex}
 .req-tb .api{font-family:Consolas,monospace;font-size:11px;color:#3E8E85;word-break:break-all}
 
 @media (max-width:1200px){
-  .list-workbench{grid-template-columns:210px minmax(0,1fr);gap:16px}
-  .list-grid{grid-template-columns:repeat(3,1fr)}
+  .list-workbench.filter-open{grid-template-columns:210px minmax(0,1fr);gap:16px}
+  .list-grid{grid-template-columns:repeat(4,1fr)}
+  .list-workbench.filter-open .list-grid{grid-template-columns:repeat(3,1fr)}
   .grid5{grid-template-columns:repeat(4,1fr)}
   .dt-top{grid-template-columns:64px 1fr 380px}
 }
 @media (max-width:820px){
-  .list-workbench{grid-template-columns:1fr}
+  .list-workbench,.list-workbench.filter-open{grid-template-columns:1fr;gap:14px}
   .filter-sidebar{position:static}
   .list-grid{grid-template-columns:repeat(2,1fr)}
+  .list-workbench.filter-open .list-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -1034,6 +1046,7 @@ const palStyle = k => {const p=PAL[k]||PAL.beige;return `--c1:${p[0]};--c2:${p[1
 const state = {
   cart:new Map(), wish:new Set(),
   filters:{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,src:null,chip:null,sort:'default',sortDir:-1,page:1},
+  filterSidebarOpen:false,
   filterGroups:{tag:true,price:false,size:false,material:false,color:false},
   bannerIdx:0, noticeIdx:0, heroIdx:0, regionIdx:0, seriesIdx:0, catTab:0,
   dt:{code:null,img:0,color:0,dim:0,mat:0,qty:1,tab:0,life:0,mode:0,vmode:0}
@@ -1375,6 +1388,8 @@ function renderList(){
   const hasCustomPrice=f.priceMin!=null||f.priceMax!=null;
   const hasCustomSize=f.sizeMin!=null||f.sizeMax!=null;
   const fn=['flag','material','color'].filter(k=>f[k]).length+(f.price!=null||hasCustomPrice?1:0)+(f.size!=null||hasCustomSize?1:0);
+  $('.list-workbench').classList.toggle('filter-open',state.filterSidebarOpen);
+  $('.filter-sidebar').setAttribute('aria-hidden',state.filterSidebarOpen?'false':'true');
   $('#listCatTabs').innerHTML='<span class="lb">分类导航</span>'+tabs.map(([n,c])=>
     `<span class="lc-tab${f.cat===n?' cur':''}" data-cat="${n}">${n}<span class="c">${c}</span></span>`).join('');
   $$('#listCatTabs .lc-tab').forEach(t=>t.addEventListener('click',()=>{
@@ -1416,11 +1431,17 @@ function renderList(){
   const list=filteredGoods();
   $('#sortbar').innerHTML='<span class="lb" style="width:86px;flex-shrink:0;color:var(--hint);font-size:12px">排序</span>'+
     sorts.map(([k,n])=>`<span class="s-op${f.sort===k?' cur':''}" data-s="${k}">${n}${k==='price'?(f.sort==='price'?(f.sortDir>0?' ↑':' ↓'):' ⇅'):''}${k==='sales'&&f.sort==='sales'?' ↓':''}</span>`).join('')
-    +`<span class="cnt"><b>${list.length}</b> products</span>`;
+    +`<span class="cnt"><b>${list.length}</b> products</span>
+      <button class="btn-filter${state.filterSidebarOpen?' on':''}" id="btnFilter" type="button" aria-expanded="${state.filterSidebarOpen}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+        筛选${fn?`<b>${fn}</b>`:''}<i class="caret">${state.filterSidebarOpen?'◀':'▶'}</i></button>`;
   $$('#sortbar .s-op').forEach(s=>s.addEventListener('click',()=>{
     const k=s.dataset.s;
     if(k==='price'&&f.sort==='price')f.sortDir*=-1;else f.sortDir=k==='price'?1:-1;
     f.sort=k;f.page=1;track('列表页','排序',k);renderList()}));
+  $('#btnFilter').addEventListener('click',()=>{
+    state.filterSidebarOpen=!state.filterSidebarOpen;
+    track('列表页','筛选侧栏',state.filterSidebarOpen?'展出':'收起');renderList()});
   /* 已选 chips */
   const chips=[];
   if(f.kw)chips.push(['kw','Search: '+f.kw]);
