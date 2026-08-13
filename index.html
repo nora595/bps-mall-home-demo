@@ -77,18 +77,6 @@ nav.main a.active{color:#1A1A1A;font-weight:600}
 nav.main a .badge-n{position:absolute;top:-3px;right:4px;min-width:15px;height:15px;border-radius:8px;background:var(--hot);color:#fff;
   font-size:9.5px;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700}
 
-/* ══════ ① 通知栏（新增） ══════ */
-#noticeBar{background:var(--mint-soft);border-bottom:1px solid var(--mint-line)}
-#noticeBar .wrap{display:flex;align-items:center;height:34px;gap:10px}
-#noticeBar .ic{color:var(--teal-deep);flex-shrink:0;display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;letter-spacing:.5px}
-.notice-viewport{flex:1;height:34px;overflow:hidden}
-.notice-track{transition:transform .5s ease}
-.notice-item{height:34px;display:flex;align-items:center;font-size:12px;color:#0C6E68;cursor:pointer;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.notice-item:hover{text-decoration:underline}
-.notice-item .tg{background:#C7F2EC;color:#0A6058;font-size:10px;padding:1px 8px;border-radius:9px;flex-shrink:0;font-weight:600}
-#noticeClose{color:#5FB5AC;font-size:14px;padding:3px 6px;border-radius:5px}
-#noticeClose:hover{background:rgba(0,0,0,.05)}
-
 /* ══════ 楼层标题（现网：细体、居中、深灰） ══════ */
 section.floor{margin-top:46px;position:relative}
 .floor-hd{text-align:center;margin-bottom:20px;position:relative}
@@ -340,7 +328,6 @@ footer .copy{border-top:1px solid #444;margin-top:32px;padding-top:16px;font-siz
 .crumb a{color:#6A6A6A;cursor:pointer}
 .crumb a:hover{color:var(--teal-deep)}
 .crumb b{color:var(--ink);font-weight:500}
-.allcat-h{font-size:16px;font-weight:600;color:var(--teal-h);margin:14px 0 14px}
 .catchips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px}
 .cchip{display:flex;align-items:center;gap:8px;padding:8px 16px 8px 8px;border:1px solid #E4E4E4;border-radius:6px;background:#fff;
   cursor:pointer;font-size:13.5px;color:#3A3A3A;transition:.18s}
@@ -651,16 +638,6 @@ body.anno .anno-chip{display:inline-flex}
   </div>
 </header>
 
-<!-- ══════ ① 通知栏（新增） ══════ -->
-<div id="noticeBar">
-  <div class="wrap">
-    <span class="ic"><svg width="14" height="14"><use href="#i-horn"/></svg>NOTICE</span>
-    <div class="notice-viewport"><div class="notice-track" id="noticeTrack"></div></div>
-    <span class="anno-chip new-f">①新增<span class="tip"><b>通知栏（新增楼层）</b><br>位于导航栏下方、轮播海报上方，滚动文字通知形式；运营端增设维护入口，可按需隐藏或展示整栏及单条公告。<br><b>建议实现：复用运营端「内容配置」楼层框架，在 conttitleType 新增「通知栏」类型</b>（不直接改造轮播小海报，也不复用已被企业公告占用的 cms_notice）。文案→contlistName、标签→contlist_conf、落地页→contlistUrl、排序→contlistOrder、单条启停→updateContlistState、整栏显隐→updateConttitleState、定时上线→contlistReleasetime。<span class="api">cms_conttitle + cms_contlist + cms_contlist_conf · /web/cms/conttitleBusiness · saveContlist / updateContlistState / queryContlistPage</span></span></span>
-    <button id="noticeClose" title="Dismiss">✕</button>
-  </div>
-</div>
-
 <!-- ══════════════ 首页 ══════════════ -->
 <div id="viewHome">
 
@@ -781,8 +758,7 @@ body.anno .anno-chip{display:inline-flex}
 <!-- ══════════════ 商品列表页（1:1 复刻 + 优化） ══════════════ -->
 <div id="viewList" class="hidden">
   <div class="wrap">
-    <div class="crumb"><a data-nav="home">Home</a><span>›</span><b id="crumbCur">Products</b><span id="crumbSrc"></span></div>
-    <div class="allcat-h">All Categories</div>
+    <div class="crumb"><a data-nav="home">Home</a><span>›</span><b id="crumbCur">Products</b></div>
     <div class="catchips" id="catChips"></div>
 
     <div class="opt-block">
@@ -1100,14 +1076,6 @@ function toggleWish(code, el, from){
 }
 
 /* ═══════════ ① 通知栏 ═══════════ */
-function renderNotice(){
-  $('#noticeTrack').innerHTML = NOTICES.map(n=>`<div class="notice-item"><span class="tg">${n.tag}</span>${n.txt}</div>`).join('');
-  setInterval(()=>{state.noticeIdx=(state.noticeIdx+1)%NOTICES.length;
-    $('#noticeTrack').style.transform=`translateY(-${state.noticeIdx*34}px)`},4000);
-  $('#noticeTrack').addEventListener('click',()=>{track('通知栏','点击公告');toast('Demo：跳转公告详情页')});
-  $('#noticeClose').addEventListener('click',()=>{$('#noticeBar').style.display='none';toast('通知栏已收起（运营端可配置默认展示 / 隐藏）')});
-}
-
 /* ═══════════ ② 轮播 ═══════════ */
 let bannerTimer;
 function slideHTML(s){
@@ -1361,7 +1329,6 @@ function renderList(){
   const crumbName = f.flag?FLAGNAME[f.flag]:f.region?REGIONS.find(r=>r.short===f.region).name+' Zone':
     f.series?f.series:f.space?f.space:(f.cat!=='All'?f.cat:'All Products');
   $('#crumbCur').textContent = crumbName;
-  $('#crumbSrc').textContent = f.src?`（from: ${f.src}${f.kw?' · search "'+f.kw+'"':''}）`:(f.kw?`（search "${f.kw}"）`:'');
   renderChips();
   /* 品类导览 Tab + 筛选收起按钮 */
   const base=filteredGoods(true);
@@ -1627,7 +1594,7 @@ function renderReq(){
 }
 
 /* ═══════════ 初始化 ═══════════ */
-renderNotice(); renderBanner(); renderCatNav(); renderCatRec(); renderSeries();
+renderBanner(); renderCatNav(); renderCatRec(); renderSeries();
 renderStrip('#hotTrack',GOODS.filter(g=>g.flags.includes('hot')).sort((a,b)=>b.sales6m-a.sales6m).slice(0,8),'爆款推荐',{showSales:true});
 renderStrip('#newTrack',GOODS.filter(g=>g.flags.includes('new')).sort((a,b)=>b.hdate.localeCompare(a.hdate)).slice(0,8),'新品推荐');
 renderCustom();
