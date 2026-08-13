@@ -689,7 +689,6 @@ body.anno .anno-chip{display:inline-flex}
   <section class="floor wrap" id="floorCat" data-floor="cat">
     <div class="floor-hd">
       <h2>Featured Categories</h2>
-      <div class="sub">FLOOR 1 · 品类推荐 — 大图 + 小图组合展示 6 大核心品类，悬停小图大图联动</div>
       <a class="more" data-go-list='{"src":"Featured Categories"}'>more <svg width="12" height="12"><use href="#i-arr-r"/></svg></a>
       <span class="anno-chip">④调整<span class="tip"><b>品类推荐（楼层1）</b><br>沿用现网左大图 + 右小图版式，标题改为「品类推荐 Featured Categories」，去掉标题下方的空间分类 Tab；内容为需求指定的 6 个核心品类：沙发类 / 床类 / 桌类 / 椅类 / 柜类 / 小件类；点击右侧品类图标与左侧大图，均跳转对应品类的商品列表页，点击 more 进入全部商品。<span class="api">/web/rs/pntree · queryPntreeTree；楼层顺序由 CMS tginfoMenu 配置</span></span></span>
     </div>
@@ -703,7 +702,6 @@ body.anno .anno-chip{display:inline-flex}
   <section class="floor wrap" id="floorSeries" data-floor="series">
     <div class="floor-hd">
       <h2>Where Style Meets Function</h2>
-      <div class="sub">FLOOR 2 · 系列推荐（原「灵感系列」更名）— 悬停展开系列面板，点击 MORE 进入系列列表页</div>
       <span class="anno-chip">⑤更名<span class="tip"><b>系列推荐（楼层2）</b><br>「灵感系列」更名为系列推荐。保留现网风格系列手风琴视觉，横向展示系列图片，点击图片 / MORE 跳转对应系列的商品列表页。<span class="api">系列 = 商品打标（goodsProperty / rtag），ES 列表页按系列字段过滤</span></span></span>
     </div>
     <div class="series-acc" id="seriesTrack"></div>
@@ -713,7 +711,6 @@ body.anno .anno-chip{display:inline-flex}
   <section class="floor wrap" id="floorHot" data-floor="hot">
     <div class="floor-hd">
       <h2>Best Sellers</h2>
-      <div class="sub">FLOOR 3 · 爆款推荐 — 按累计半年销量排序，运营端支持手动调整；改为横滑展示</div>
       <a class="more" data-go-list='{"flag":"hot","src":"Best Sellers"}'>more <svg width="12" height="12"><use href="#i-arr-r"/></svg></a>
       <span class="anno-chip">⑥调整<span class="tip"><b>爆款推荐（楼层3）</b><br>现网为 5 列换行网格，<b>改为横向展示 5 款 + 箭头滑动查看</b>，more 跳转爆款商品列表页。排序采用「累计半年销量」逻辑，运营端支持手动置顶 / 调序；全楼层增设埋点监测点击率与转化率。<span class="api">大数据 statisticRecommender/statistic 销量策略 → ES salesVolume6m 排序字段</span></span></span>
     </div>
@@ -728,7 +725,6 @@ body.anno .anno-chip{display:inline-flex}
   <section class="floor wrap" id="floorNew" data-floor="new">
     <div class="floor-hd">
       <h2>New Arrivals</h2>
-      <div class="sub">FLOOR 4 · 新品推荐 — 按上新时间排序，横滑查看，抢先锁定首单资源</div>
       <a class="more" data-go-list='{"flag":"new","src":"New Arrivals"}'>more <svg width="12" height="12"><use href="#i-arr-r"/></svg></a>
       <span class="anno-chip">⑦调整<span class="tip"><b>新品推荐（楼层4）</b><br>横向展示 5 款，点击箭头滑动查看，点击 more 跳转新品推荐商品列表页。<span class="api">ES sortField=skuHdate（上新时间）· find.json</span></span></span>
     </div>
@@ -743,7 +739,6 @@ body.anno .anno-chip{display:inline-flex}
   <section class="floor wrap" id="floorRegion" data-floor="region">
     <div class="floor-hd">
       <h2>Global Marketplace</h2>
-      <div class="sub">FLOOR 5 · 大区专区（新增）— 按市场划分商品专区，3×2 分布，区域打标字段驱动</div>
       <a class="more" id="regionMore">more <svg width="12" height="12"><use href="#i-arr-r"/></svg></a>
       <span class="anno-chip new-f">⑧新增<span class="tip"><b>大区专区（楼层5，新增）</b><br>新增商品「区域打标字段」，按市场划分商品专区（东南亚 / 澳新 / 拉美）；专区内以 3×2 分布产品图片，点击产品图片进入商品详情，点击<b>标题下方的 more</b> 跳转当前大区的商品列表页查看更多区域商品（二跳页携带区域标）。<span class="api">商品域新增 regionTag（可挂 rtag / goodsProperty），ES 同步后支持专区过滤</span></span></span>
     </div>
@@ -756,7 +751,6 @@ body.anno .anno-chip{display:inline-flex}
   <section class="floor wrap" id="floorCustom" data-floor="custom">
     <div class="floor-hd">
       <h2>Co-Creation · <em>Group Orders</em></h2>
-      <div class="sub">FLOOR 6 · 定制产品（新增）— 按客户加购意向智能选品，每款显示拼单进度，拼满起订量即开产</div>
       <a class="more" data-go-list='{"flag":"custom","src":"Group Orders"}'>more <svg width="12" height="12"><use href="#i-arr-r"/></svg></a>
       <span class="anno-chip new-f">⑨新增<span class="tip"><b>定制产品（楼层6，新增）</b><br>横向展示 5 款，每款产品下方显示拼单进度；选品逻辑抓取客户「加购意向清单」等行为数据；楼层支持悬浮显示（右下角悬浮窗常驻）或始终在页面可见区域。<span class="api">选品：大数据 recSimInterestCart（加购兴趣）+ ocshopping 购物车；拼单复用 promotion 拼团能力</span></span></span>
     </div>
@@ -771,7 +765,6 @@ body.anno .anno-chip{display:inline-flex}
   <section class="floor wrap" id="floorSale" data-floor="sale">
     <div class="floor-hd">
       <h2>Clearance <em>Deals</em></h2>
-      <div class="sub">FLOOR 7 · 特价产品 / 滞销品（新增）— 运营端手动划定特惠产品池，售完即止</div>
       <a class="more" data-go-list='{"flag":"sale","src":"Clearance"}'>more <svg width="12" height="12"><use href="#i-arr-r"/></svg></a>
       <span class="anno-chip new-f">⑩新增<span class="tip"><b>特价产品 / 滞销品（楼层7，新增）</b><br>运营端新增维护入口，通过手动选择划定特价产品池；前台展示原价 / 特价对比与 SALE 角标。<span class="api">运营端选品池 → CMS 栏目内容（tginfoMenu + contlist）或商品 saleFlag 打标</span></span></span>
     </div>
