@@ -336,34 +336,47 @@ footer .copy{border-top:1px solid #444;margin-top:32px;padding-top:16px;font-siz
 .cchip .th{width:34px;height:24px;border-radius:3px;background:#F2F2F2;display:flex;align-items:center;justify-content:center;
   font-size:6px;color:#9A9A9A;overflow:hidden;flex-shrink:0}
 .cchip .th svg{width:30px;height:22px}
-/* 优化项：品类导览 Tab + 筛选栏 */
+/* 优化项：顶部分类导航 + 左侧折叠筛选栏 */
 .opt-block{border:1px dashed var(--mint);border-radius:6px;padding:2px 14px;margin-top:14px;background:#FCFFFE;position:relative}
 .opt-flag{position:absolute;top:-9px;left:14px;background:var(--mint);color:#fff;font-size:10px;font-weight:600;padding:1px 9px;border-radius:9px}
 body:not(.anno) .opt-block{border-color:transparent;background:#fff;padding-left:0;padding-right:0}
 body:not(.anno) .opt-flag{display:none}
 .lc-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:11px 0 9px}
 .lc-row .lb{font-size:12px;color:var(--hint);width:86px;flex-shrink:0}
-.tb-spacer{flex:1;min-width:12px}
-.btn-filter{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 15px;border:1px solid #DFE1E3;border-radius:15px;
-  font-size:12.5px;color:#4A4A4A;background:#fff;transition:.16s;flex-shrink:0}
-.btn-filter:hover{border-color:var(--mint);color:var(--teal-deep)}
-.btn-filter.on{background:var(--mint-soft);border-color:var(--mint);color:var(--teal-deep);font-weight:600}
-.btn-filter b{background:var(--mint);color:#fff;font-size:10.5px;min-width:17px;height:17px;border-radius:9px;
-  display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
-.btn-filter .caret{font-size:9px;font-style:normal;opacity:.6}
-.btn-filter svg{width:13px;height:13px}
-.fpanel{border-top:1px dashed #EFEFEF;animation:fpin .2s}
-@keyframes fpin{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
 .lc-tab{padding:5px 15px;border-radius:15px;font-size:12.5px;color:#4A4A4A;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:5px}
 .lc-tab:hover{color:var(--teal-deep);background:var(--mint-soft)}
 .lc-tab.cur{background:var(--mint);color:#fff;font-weight:600}
 .lc-tab .c{font-size:10px;opacity:.75}
-.f-row{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-top:1px dashed #F0F0F0;font-size:12.5px}
-.f-ops{display:flex;flex-wrap:wrap;gap:2px;flex:1}
-.f-op{padding:4px 12px;border-radius:13px;cursor:pointer;color:#4A4A4A;transition:.13s}
-.f-op:hover{color:var(--teal-deep)}
-.f-op.cur{background:var(--mint-soft);color:var(--teal-deep);font-weight:600}
-.sortbar{display:flex;align-items:center;gap:4px;padding:10px 0;border-top:1px dashed #F0F0F0}
+.list-workbench{display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px;align-items:start;margin-top:18px}
+.filter-sidebar{position:sticky;top:16px;border:1px solid #E7E9E9;border-radius:8px;background:#fff;box-shadow:0 5px 18px rgba(24,55,52,.05);overflow:hidden}
+.filter-side-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #EEF0F0;font-size:14px;font-weight:600;color:#242424}
+.filter-side-hd .selected-count{min-width:20px;height:20px;border-radius:10px;background:var(--mint);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+.filter-side-hd .selected-count:empty{display:none}
+.fgroup{border-bottom:1px solid #F0F1F1}
+.fgroup:last-child{border-bottom:0}
+.fgroup-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:#fff;color:#303030;font-size:13px;font-weight:600;text-align:left;transition:.15s}
+.fgroup-toggle:hover{color:var(--teal-deep);background:#FBFEFD}
+.fgroup-toggle .arrow{font-size:11px;color:#A1A6A5;transition:transform .18s}
+.fgroup.open .fgroup-toggle .arrow{transform:rotate(180deg)}
+.fgroup-body{display:none;padding:0 12px 14px;animation:sideIn .16s ease-out}
+.fgroup.open .fgroup-body{display:block}
+@keyframes sideIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.filter-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.filter-options.one-col{grid-template-columns:1fr}
+.f-op{min-height:32px;padding:6px 8px;border:1px solid #E7E8E8;border-radius:4px;background:#fff;color:#555;font-size:11.5px;line-height:1.3;text-align:center;cursor:pointer;transition:.14s;word-break:break-word}
+.f-op:hover{border-color:var(--mint);color:var(--teal-deep)}
+.f-op.cur{border-color:var(--mint);background:var(--mint-soft);color:var(--teal-deep);font-weight:600;box-shadow:inset 0 0 0 1px var(--mint)}
+.range-slider{position:relative;height:26px;margin:0 5px 3px}
+.range-slider::before{content:"";position:absolute;left:0;right:0;top:12px;height:2px;background:#DDE3E2}
+.range-slider .range-fill{position:absolute;left:0;right:0;top:12px;height:2px;background:var(--mint)}
+.range-slider input{position:absolute;left:0;top:3px;width:100%;height:20px;margin:0;background:transparent;pointer-events:none;appearance:none}
+.range-slider input::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;border:2px solid var(--mint);background:#fff;pointer-events:auto;cursor:pointer}
+.range-values{display:flex;gap:7px;margin:7px 0 9px}
+.range-values input,.filter-custom{width:100%;height:31px;border:1px solid #E3E5E5;border-radius:4px;padding:0 8px;font:inherit;font-size:11.5px;color:#444;outline:none}
+.range-values input:focus,.filter-custom:focus{border-color:var(--mint);box-shadow:0 0 0 2px rgba(58,223,205,.13)}
+.f-swatch{display:inline-block;width:12px;height:12px;border:1px solid rgba(0,0,0,.12);border-radius:2px;vertical-align:-2px;margin-right:5px}
+.list-results{min-width:0}
+.sortbar{display:flex;align-items:center;gap:4px;padding:0 0 10px;border-bottom:1px dashed #F0F0F0}
 .s-op{padding:5px 14px;border-radius:4px;font-size:12.5px;color:#4A4A4A;cursor:pointer;display:flex;align-items:center;gap:3px;transition:.13s}
 .s-op:hover{color:var(--teal-deep)}
 .s-op.cur{background:var(--mint);color:#fff;font-weight:600}
@@ -374,7 +387,7 @@ body:not(.anno) .opt-flag{display:none}
 .a-chip .x{cursor:pointer;font-weight:700}
 .a-clear{font-size:11.5px;color:var(--hint);cursor:pointer;text-decoration:underline}
 .a-clear:hover{color:var(--teal-deep)}
-.list-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px 4px;margin-top:14px}
+.list-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 5px;margin-top:14px}
 .empty{padding:70px 0;text-align:center;color:var(--hint)}
 .empty svg{width:70px;height:56px;opacity:.35;margin-bottom:12px}
 .pager{display:flex;justify-content:center;align-items:center;gap:6px;margin:34px 0 8px}
@@ -530,8 +543,15 @@ body.anno .anno-chip{display:inline-flex}
 .req-tb .api{font-family:Consolas,monospace;font-size:11px;color:#3E8E85;word-break:break-all}
 
 @media (max-width:1200px){
-  .list-grid,.grid5{grid-template-columns:repeat(4,1fr)}
+  .list-workbench{grid-template-columns:210px minmax(0,1fr);gap:16px}
+  .list-grid{grid-template-columns:repeat(3,1fr)}
+  .grid5{grid-template-columns:repeat(4,1fr)}
   .dt-top{grid-template-columns:64px 1fr 380px}
+}
+@media (max-width:820px){
+  .list-workbench{grid-template-columns:1fr}
+  .filter-sidebar{position:static}
+  .list-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -764,15 +784,22 @@ body.anno .anno-chip{display:inline-flex}
     <div class="opt-block">
       <span class="opt-flag">⑪ 优化新增</span>
       <div class="lc-row" id="listCatTabs"></div>
-      <div id="filterPanel" class="fpanel hidden"><div id="filterbar"></div></div>
-      <div class="sortbar" id="sortbar"></div>
-      <div class="active-chips" id="activeChips"></div>
-      <div style="padding:0 0 10px"><span class="anno-chip">⑪调整<span class="tip"><b>商品列表页（二跳页）优化</b><br>1) 列表页上方设置<b>品类分类导览</b>，点击分类即展开对应产品（带在售数量）；2) 新增<b>筛选栏</b>（Space / Series / Region Zone / Price），<b>默认收起</b>，点右侧「筛选」按钮展开，避免占用首屏商品位；3) 从首页带入的筛选条件以「已选」标签常驻显示，收起状态下也能看到并单独清除；4) 排序新增累计半年销量；5) 商品卡展示区域打标。原有 All Categories 胶囊行、5 列网格、分页器保持不变。<span class="api">ES find.json：classtreeCode / 系列 / regionTag 过滤 + sortField=salesVolume6m 排序</span></span></span></div>
+      <div style="padding:0 0 10px"><span class="anno-chip">⑪调整<span class="tip"><b>商品列表页（二跳页）优化</b><br>1) 列表页顶部保留图片型分类导航；2) 筛选项按设计稿移至商品网格左侧，标签 / 价格 / 尺寸 / 材质 / 颜色点击标题展开；3) 已选条件可逐个清除；4) 排序保留Best Match、半年销量、价格、上新。<span class="api">ES find.json：标签、价格、尺寸、材质、颜色过滤 + sortField=salesVolume6m</span></span></span></div>
     </div>
 
-    <div class="list-grid" id="listGrid"></div>
-    <div class="empty hidden" id="listEmpty"><svg><use href="#p-shelf"/></svg><div>No products match the current filters.</div></div>
-    <div class="pager" id="pager"></div>
+    <div class="list-workbench">
+      <aside class="filter-sidebar" aria-label="商品筛选">
+        <div class="filter-side-hd"><span>筛选栏</span><span class="selected-count" id="selectedCount"></span></div>
+        <div id="filterbar"></div>
+      </aside>
+      <main class="list-results">
+        <div class="sortbar" id="sortbar"></div>
+        <div class="active-chips" id="activeChips"></div>
+        <div class="list-grid" id="listGrid"></div>
+        <div class="empty hidden" id="listEmpty"><svg><use href="#p-shelf"/></svg><div>No products match the current filters.</div></div>
+        <div class="pager" id="pager"></div>
+      </main>
+    </div>
   </div>
 </div>
 
@@ -964,7 +991,9 @@ const GOODS = RAW.map((r,i)=>({
   idx:i, code:'BPS'+String(i+1).padStart(3,'0'), name:r[0], price:r[1], delivery:r[2], moq:r[3], item:r[4],
   icon:r[5], cat:r[6], space:r[7], series:r[8], regions:r[9]?r[9].split(','):[],
   flags:r[10]?r[10].split(','):[], sales6m:r[11], hdate:r[12], sw:r[13].split(','),
-  oldPrice:r[14]||null, progress:r[15]!=null?r[15]:null
+  oldPrice:r[14]||null, progress:r[15]!=null?r[15]:null,
+  material:['三胺板','橡胶木','橡木','胡桃木','猫抓布','真皮','仿棉麻','雪尼尔'][(i*3+(r[6]||'').length)%8],
+  sizeM:+(0.8+((i*7)%30)/10).toFixed(1)
 }));
 const NOTICES = [
   {tag:'Event', txt:'2026 Autumn GTM Global Launch goes live Sept 1 — dealer pre-registration is now open'},
@@ -991,7 +1020,7 @@ const REQS = [
   {m:'⑧ 大区-5', t:'n', req:'新增区域打标字段，按市场划分商品专区，3×2 分布产品图，more/图片跳对应列表页', impl:'SEA / ANZ / LATAM 三专区 Tab 切换，3×2 商品矩阵，卡片露出区域标；二跳列表页携带大区筛选', api:'商品域新增 regionTag 字段 → ES 同步过滤'},
   {m:'⑨ 定制产品-6', t:'n', req:'横向展示 5 款并显示拼单进度；抓取客户加购意向清单确定展示逻辑；楼层支持悬浮或常驻可见', impl:'5 款定制品带拼单进度条（10%~90%）+ 一键参团；右下角悬浮窗常驻露出 TOP3 拼单', api:'大数据 recSimInterestCart（加购兴趣）+ promotion 拼团 + ocshopping'},
   {m:'⑩ 特价产品-7', t:'n', req:'滞销品清仓专区；运营端新增维护入口，手动选择划定产品池', impl:'横滑特价专区，原价划线 / 特价红字对比 + SALE 角标', api:'运营端选品池 → tginfoMenu 栏目内容 / saleFlag 打标'},
-  {m:'⑪ 商品列表页', t:'u', req:'每一列表页上方设置品类分类导览，点击分类展开对应产品；列表页设置筛选栏', impl:'保留现网 All Categories 胶囊行、5 列网格、分页器；新增品类导览 Tab（带在售数量）、Space/Series/Region/Price 四组筛选、Best Match/销量/价格/上新排序、已选条件可单独清除', api:'ES find.json 多维过滤 + 新增 salesVolume6m 排序字段'},
+  {m:'⑪ 商品列表页', t:'u', req:'每一列表页上方设置品类分类导航；参考设计稿在商品区左侧设置筛选栏，标签等条件点击标题展开', impl:'保留顶部图片型分类导航；左侧新增标签、价格、尺寸、材质、颜色五组折叠筛选，支持预设值、区间输入、已选条件清除；右侧展示4列商品与Best Match/销量/价格/上新排序', api:'ES find.json 标签、价格、尺寸、材质、颜色过滤 + salesVolume6m 排序字段'},
   {m:'⑫ 商品详情页', t:'k', req:'（未提优化，1:1 复刻）', impl:'缩略图列 + 主图轮播、Block/Custom 与 Variations/List Mode 分段控件、Color/Dim/Material 选择、QTY 步进器与 MOQ、Add to Shopping list、Description/Size Chart/Material/Installation/Recommend 标签页、Attributes 表格、场景大图轮播、Same Series/Category/Style 三组推荐', api:'/web/rs/resourceGoods · getResourceGoods + RsSku 规格'},
   {m:'⑬ 数据埋点', t:'n', req:'增设埋点，实现点击率与转化率等数据监测分析', impl:'全楼层交互均已挂埋点事件（楼层曝光 / 点击 / 加购 / 参团 / 筛选 / 选规格，楼层×商品维度，静默上报），控制台可查看事件流', api:'前端埋点 SDK → FlowData / 大数据平台回流分析'}
 ];
@@ -1004,13 +1033,16 @@ const byCode = c => GOODS.find(g => g.code === c);
 const palStyle = k => {const p=PAL[k]||PAL.beige;return `--c1:${p[0]};--c2:${p[1]};--c3:${p[2]}`};
 const state = {
   cart:new Map(), wish:new Set(),
-  filters:{cat:'All',space:null,series:null,region:null,price:null,flag:null,kw:null,src:null,chip:null,sort:'default',sortDir:-1,page:1},
-  filterOpen:false,
+  filters:{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,src:null,chip:null,sort:'default',sortDir:-1,page:1},
+  filterGroups:{tag:true,price:false,size:false,material:false,color:false},
   bannerIdx:0, noticeIdx:0, heroIdx:0, regionIdx:0, seriesIdx:0, catTab:0,
   dt:{code:null,img:0,color:0,dim:0,mat:0,qty:1,tab:0,life:0,mode:0,vmode:0}
 };
 const FLAGNAME = {hot:'Best Sellers', new:'New Arrivals', sale:'Clearance Deals', custom:'Group Orders'};
-const PRICE_BANDS = [['$0 – 99',0,99],['$100 – 199',100,199],['$200 – 399',200,399],['$400 +',400,1e9]];
+const PRICE_BANDS = [['¥0 – ¥500',0,500],['¥500 – ¥1000',500,1000],['¥1000 – ¥2000',1000,2000],['¥2000 – ¥3000',2000,3000]];
+const SIZE_BANDS = [['0m–1m',0,1],['1m–2m',1,2],['2m–3m',2,3],['3m–4m',3,4]];
+const MATERIALS = ['三胺板','橡胶木','橡木','胡桃木','猫抓布','真皮','仿棉麻','雪尼尔'];
+const COLOR_FILTERS = [['oak','原木色'],['white','白色'],['grey','灰色'],['walnut','胡桃色'],['black','黑色'],['beige','米色'],['terra','黄色'],['cream','粉色']];
 const PER_PAGE = 20;
 
 function toast(msg, ok){
@@ -1290,7 +1322,7 @@ function closeCart(){$('#cartMask').classList.remove('show');$('#cartDrawer').cl
 /* ═══════════ 商品列表页 ═══════════ */
 function goList(p={}){
   const f=state.filters;
-  Object.assign(f,{cat:'All',space:null,series:null,region:null,price:null,flag:null,kw:null,src:null,chip:null,sort:'default',sortDir:-1,page:1});
+  Object.assign(f,{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,src:null,chip:null,sort:'default',sortDir:-1,page:1});
   if(p.cat) f.cat=p.cat;
   ['space','series','region','flag','kw','src','chip'].forEach(k=>{if(p[k])f[k]=p[k]});
   if(p.space) f.chip=p.space;
@@ -1307,7 +1339,14 @@ function filteredGoods(ignoreCat){
     if(f.region && !g.regions.includes(f.region)) return false;
     if(f.flag && !g.flags.includes(f.flag)) return false;
     if(f.kw && !(g.name+g.item).toLowerCase().includes(f.kw.toLowerCase())) return false;
-    if(f.price){const b=PRICE_BANDS[f.price];if(g.price<b[1]||g.price>b[2])return false}
+    if(f.price!=null){const b=PRICE_BANDS[f.price];if(g.price<b[1]||g.price>=b[2])return false}
+    if(f.priceMin!=null && g.price<f.priceMin) return false;
+    if(f.priceMax!=null && g.price>f.priceMax) return false;
+    if(f.size!=null){const b=SIZE_BANDS[f.size];if(g.sizeM<b[1]||g.sizeM>=b[2])return false}
+    if(f.sizeMin!=null && g.sizeM<f.sizeMin) return false;
+    if(f.sizeMax!=null && g.sizeM>f.sizeMax) return false;
+    if(f.material && g.material!==f.material) return false;
+    if(f.color && !g.sw.includes(f.color)) return false;
     return true;
   });
 }
@@ -1333,35 +1372,45 @@ function renderList(){
   /* 品类导览 Tab + 筛选收起按钮 */
   const base=filteredGoods(true);
   const tabs=[['All',base.length],...CATS.map(c=>[c.name,base.filter(g=>g.cat===c.name).length])];
-  const fn=['space','series','region'].filter(k=>f[k]).length+(f.price!=null?1:0);
-  $('#listCatTabs').innerHTML='<span class="lb">品类导览</span>'+tabs.map(([n,c])=>
-    `<span class="lc-tab${f.cat===n?' cur':''}" data-cat="${n}">${n}<span class="c">${c}</span></span>`).join('')
-    +`<span class="tb-spacer"></span>
-      <button class="btn-filter${state.filterOpen?' on':''}" id="btnFilter">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
-        筛选${fn?`<b>${fn}</b>`:''}<i class="caret">${state.filterOpen?'▲':'▼'}</i></button>`;
+  const hasCustomPrice=f.priceMin!=null||f.priceMax!=null;
+  const hasCustomSize=f.sizeMin!=null||f.sizeMax!=null;
+  const fn=['flag','material','color'].filter(k=>f[k]).length+(f.price!=null||hasCustomPrice?1:0)+(f.size!=null||hasCustomSize?1:0);
+  $('#listCatTabs').innerHTML='<span class="lb">分类导航</span>'+tabs.map(([n,c])=>
+    `<span class="lc-tab${f.cat===n?' cur':''}" data-cat="${n}">${n}<span class="c">${c}</span></span>`).join('');
   $$('#listCatTabs .lc-tab').forEach(t=>t.addEventListener('click',()=>{
     f.cat=t.dataset.cat;f.page=1;track('列表页','点击品类导览',f.cat);renderList()}));
-  $('#filterPanel').classList.toggle('hidden',!state.filterOpen);
-  $('#btnFilter').addEventListener('click',()=>{
-    state.filterOpen=!state.filterOpen;
-    $('#filterPanel').classList.toggle('hidden',!state.filterOpen);
-    $('#btnFilter').classList.toggle('on',state.filterOpen);
-    $('#btnFilter').querySelector('.caret').textContent=state.filterOpen?'▲':'▼';
-    track('列表页','筛选栏',state.filterOpen?'展开':'收起')});
-  /* 筛选栏 */
-  const frow=(lb,ops,key,cur,vals)=>`<div class="f-row"><span class="lb" style="width:86px;flex-shrink:0;color:var(--hint)">${lb}</span><div class="f-ops">
-    <span class="f-op${cur==null?' cur':''}" data-f="${key}" data-v="">All</span>
-    ${ops.map((o,i)=>{const v=vals?vals[i]:o;return `<span class="f-op${String(cur)===String(v)?' cur':''}" data-f="${key}" data-v="${v}">${o}</span>`}).join('')}</div></div>`;
+  /* 侧边筛选栏：标题点击展开 */
+  const group=(key,title,body)=>`<section class="fgroup${state.filterGroups[key]?' open':''}" data-group="${key}">
+    <button class="fgroup-toggle" type="button" data-toggle="${key}" aria-expanded="${state.filterGroups[key]?'true':'false'}"><span>${title}</span><span class="arrow">⌄</span></button>
+    <div class="fgroup-body">${body}</div></section>`;
+  const opts=(items,key,cur,withAll=true)=>`<div class="filter-options">${withAll?`<button class="f-op${cur==null?' cur':''}" data-f="${key}" data-v="">全部</button>`:''}${items.map(([v,o,extra])=>`<button class="f-op${String(cur)===String(v)?' cur':''}" data-f="${key}" data-v="${v}">${extra||''}${o}</button>`).join('')}</div>`;
+  const flagItems=[['hot','爆款'],['new','新品'],['custom','定制'],['sale','特价']];
+  const priceItems=PRICE_BANDS.map((b,i)=>[i,b[0]]),sizeItems=SIZE_BANDS.map((b,i)=>[i,b[0]]);
+  const materialItems=MATERIALS.map(v=>[v,v]),colorItems=COLOR_FILTERS.map(([v,n])=>[v,n,`<i class="f-swatch" style="background:${SWHEX[v]||'#EEE'}"></i>`]);
   $('#filterbar').innerHTML =
-    frow('Space',SPACES.slice(1,6).map(s=>s.name),'space',f.space) +
-    frow('Series',SERIES.map(s=>s.name),'series',f.series) +
-    frow('Region Zone',REGIONS.map(r=>r.flag+' '+r.name),'region',f.region,REGIONS.map(r=>r.short)) +
-    frow('Price (FOB)',PRICE_BANDS.map(b=>b[0]),'price',f.price,PRICE_BANDS.map((b,i)=>i));
+    group('tag','标签',opts(flagItems,'flag',f.flag))+
+    group('price','价格',`<div class="range-slider"><span class="range-fill"></span><input id="priceMinRange" type="range" min="0" max="3000" step="50" value="${f.priceMin??0}"><input id="priceMaxRange" type="range" min="0" max="3000" step="50" value="${f.priceMax??3000}"></div>${opts(priceItems,'price',f.price,false)}<div class="range-values"><input id="priceMinInput" inputmode="decimal" placeholder="最低价" value="${f.priceMin??''}"><input id="priceMaxInput" inputmode="decimal" placeholder="最高价" value="${f.priceMax??''}"></div>`)+
+    group('size','尺寸',`<div class="range-slider"><span class="range-fill"></span><input id="sizeMinRange" type="range" min="0" max="4" step="0.1" value="${f.sizeMin??0}"><input id="sizeMaxRange" type="range" min="0" max="4" step="0.1" value="${f.sizeMax??4}"></div>${opts(sizeItems,'size',f.size,false)}<div class="range-values"><input id="sizeMinInput" inputmode="decimal" placeholder="最小m" value="${f.sizeMin??''}"><input id="sizeMaxInput" inputmode="decimal" placeholder="最大m" value="${f.sizeMax??''}"></div>`)+
+    group('material','材质',opts(materialItems,'material',f.material))+
+    group('color','颜色',opts(colorItems,'color',f.color));
+  $('#selectedCount').textContent=fn?String(fn):'';
+  $$('#filterbar [data-toggle]').forEach(btn=>btn.addEventListener('click',()=>{
+    const k=btn.dataset.toggle;state.filterGroups[k]=!state.filterGroups[k];track('列表页','筛选分组',`${k}:${state.filterGroups[k]?'展开':'收起'}`);renderList()}));
   $$('#filterbar .f-op').forEach(op=>op.addEventListener('click',()=>{
     const k=op.dataset.f,v=op.dataset.v;
-    f[k]= v===''?null:(k==='price'?+v:v);
+    f[k]= v===''?null:((k==='price'||k==='size')?+v:v);
+    if(k==='price'){f.priceMin=null;f.priceMax=null}
+    if(k==='size'){f.sizeMin=null;f.sizeMax=null}
     f.page=1;track('列表页','筛选',`${k}=${v||'All'}`);renderList()}));
+  const bindRange=(key,minId,maxId,minInput,maxInput)=>{
+    const minR=$(minId),maxR=$(maxId),minI=$(minInput),maxI=$(maxInput);
+    const apply=(a,b)=>{let lo=a===''?null:+a,hi=b===''?null:+b;if(lo!=null&&hi!=null&&lo>hi)[lo,hi]=[hi,lo];f[key+'Min']=lo;f[key+'Max']=hi;f[key==='price'?'price':'size']=null;f.page=1;renderList()};
+    minR.addEventListener('change',()=>apply(minR.value,maxR.value));maxR.addEventListener('change',()=>apply(minR.value,maxR.value));
+    minI.addEventListener('change',()=>apply(minI.value,maxI.value));maxI.addEventListener('change',()=>apply(minI.value,maxI.value));
+    minI.addEventListener('keydown',e=>{if(e.key==='Enter')apply(minI.value,maxI.value)});maxI.addEventListener('keydown',e=>{if(e.key==='Enter')apply(minI.value,maxI.value)});
+  };
+  bindRange('price','#priceMinRange','#priceMaxRange','#priceMinInput','#priceMaxInput');
+  bindRange('size','#sizeMinRange','#sizeMaxRange','#sizeMinInput','#sizeMaxInput');
   /* 排序 */
   const sorts=[['default','Best Match'],['sales','6-Month Sales'],['price','Price'],['date','Newest']];
   const list=filteredGoods();
@@ -1380,6 +1429,11 @@ function renderList(){
   if(f.series)chips.push(['series',f.series]);
   if(f.region)chips.push(['region',f.region+' Zone']);
   if(f.price!=null)chips.push(['price',PRICE_BANDS[f.price][0]]);
+  else if(hasCustomPrice)chips.push(['customPrice',`价格 ${f.priceMin??0}–${f.priceMax??'不限'}`]);
+  if(f.size!=null)chips.push(['size',SIZE_BANDS[f.size][0]]);
+  else if(hasCustomSize)chips.push(['customSize',`尺寸 ${f.sizeMin??0}–${f.sizeMax??'不限'}m`]);
+  if(f.material)chips.push(['material',f.material]);
+  if(f.color)chips.push(['color',(COLOR_FILTERS.find(x=>x[0]===f.color)||[,f.color])[1]]);
   if(f.cat!=='All')chips.push(['cat',f.cat]);
   $('#activeChips').innerHTML = chips.length
     ? '<span style="color:var(--hint);width:86px;flex-shrink:0;font-size:12px">已选条件</span>'
@@ -1388,10 +1442,10 @@ function renderList(){
     : '';
   $('#activeChips').style.paddingBottom = chips.length?'10px':'0';
   $$('#activeChips .x').forEach(x=>x.addEventListener('click',()=>{
-    const k=x.dataset.ck; if(k==='cat')f.cat='All';else f[k]=null;
+    const k=x.dataset.ck;if(k==='cat')f.cat='All';else if(k==='customPrice'){f.priceMin=null;f.priceMax=null}else if(k==='customSize'){f.sizeMin=null;f.sizeMax=null}else f[k]=null;
     if(k==='space'||k==='flag')f.chip=null; f.page=1;renderList()}));
   const ca=$('#clearAll'); if(ca)ca.addEventListener('click',()=>{
-    Object.assign(f,{cat:'All',space:null,series:null,region:null,price:null,flag:null,kw:null,chip:null,page:1});renderList()});
+    Object.assign(f,{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,chip:null,page:1});renderList()});
   /* 网格 */
   const sorted=[...list];
   if(f.sort==='sales')sorted.sort((a,b)=>b.sales6m-a.sales6m);
