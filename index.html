@@ -347,12 +347,17 @@ body:not(.anno) .opt-flag{display:none}
 .lc-tab:hover{color:var(--teal-deep);background:var(--mint-soft)}
 .lc-tab.cur{background:var(--mint);color:#fff;font-weight:600}
 .lc-tab .c{font-size:10px;opacity:.75}
-.list-workbench{display:grid;grid-template-columns:minmax(0,1fr);gap:0;align-items:start;margin-top:18px;transition:grid-template-columns .2s,gap .2s}
+.list-cat-nav{margin-top:0}
+.list-workbench{display:grid;grid-template-columns:minmax(0,1fr);gap:0;align-items:start;margin-top:8px;transition:grid-template-columns .2s,gap .2s}
 .list-workbench.filter-open{grid-template-columns:230px minmax(0,1fr);gap:24px}
-.filter-sidebar{display:none;position:sticky;top:16px;border:1px solid #E7E9E9;border-radius:8px;background:#fff;box-shadow:0 5px 18px rgba(24,55,52,.05);overflow:hidden;animation:sidePanelIn .2s ease-out}
+.filter-sidebar{display:none;position:sticky;top:16px;max-height:calc(100vh - 32px);border:1px solid #E7E9E9;border-radius:8px;background:#fff;box-shadow:0 5px 18px rgba(24,55,52,.05);overflow:hidden;animation:sidePanelIn .2s ease-out}
 .list-workbench.filter-open .filter-sidebar{display:block}
 @keyframes sidePanelIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
 .filter-side-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #EEF0F0;font-size:14px;font-weight:600;color:#242424}
+#filterbar{max-height:calc(100vh - 82px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#B8C4C2 transparent}
+#filterbar::-webkit-scrollbar{width:6px}
+#filterbar::-webkit-scrollbar-thumb{background:#B8C4C2;border-radius:6px}
+#filterbar::-webkit-scrollbar-track{background:transparent}
 .filter-side-hd .selected-count{min-width:20px;height:20px;border-radius:10px;background:var(--mint);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
 .filter-side-hd .selected-count:empty{display:none}
 .fgroup{border-bottom:1px solid #F0F1F1}
@@ -380,7 +385,7 @@ body:not(.anno) .opt-flag{display:none}
 .f-swatch{display:inline-block;width:12px;height:12px;border:1px solid rgba(0,0,0,.12);border-radius:2px;vertical-align:-2px;margin-right:5px}
 .list-results{min-width:0}
 .sortbar{display:flex;align-items:center;gap:4px;padding:0 0 10px;border-bottom:1px dashed #F0F0F0}
-.btn-filter{display:inline-flex;align-items:center;gap:6px;height:31px;margin-left:12px;padding:0 14px;border:1px solid #DDE2E1;border-radius:16px;background:#fff;color:#4C5554;font-size:12px;transition:.15s}
+.btn-filter{display:inline-flex;align-items:center;gap:6px;height:31px;margin-right:18px;padding:0 14px;border:1px solid #DDE2E1;border-radius:16px;background:#fff;color:#4C5554;font-size:12px;transition:.15s}
 .btn-filter:hover,.btn-filter.on{border-color:var(--mint);color:var(--teal-deep);background:var(--mint-soft)}
 .btn-filter.on{font-weight:600}
 .btn-filter svg{width:13px;height:13px}
@@ -790,13 +795,10 @@ body.anno .anno-chip{display:inline-flex}
 <!-- ══════════════ 商品列表页（1:1 复刻 + 优化） ══════════════ -->
 <div id="viewList" class="hidden">
   <div class="wrap">
-    <div class="crumb"><a data-nav="home">Home</a><span>›</span><b id="crumbCur">Products</b></div>
-    <div class="catchips" id="catChips"></div>
-
-    <div class="opt-block">
+    <div class="opt-block list-cat-nav">
       <span class="opt-flag">⑪ 优化新增</span>
       <div class="lc-row" id="listCatTabs"></div>
-      <div style="padding:0 0 10px"><span class="anno-chip">⑪调整<span class="tip"><b>商品列表页（二跳页）优化</b><br>1) 列表页顶部保留图片型分类导航；2) 筛选项按设计稿移至商品网格左侧，标签 / 价格 / 尺寸 / 材质 / 颜色点击标题展开；3) 已选条件可逐个清除；4) 排序保留Best Match、半年销量、价格、上新。<span class="api">ES find.json：标签、价格、尺寸、材质、颜色过滤 + sortField=salesVolume6m</span></span></span></div>
+      <div style="padding:0 0 10px"><span class="anno-chip">⑪调整<span class="tip"><b>商品列表页（二跳页）优化</b><br>1) 品类分类导航上移；2) 筛选入口与筛选栏置于商品区左侧，标签 / 价格 / 尺寸 / 材质 / 颜色点击标题展开并支持上下滚动；3) 已选条件可逐个清除；4) 排序显示新品、爆款、特价、定制。<span class="api">ES find.json：标签、价格、尺寸、材质、颜色过滤 + 业务标签排序</span></span></span></div>
     </div>
 
     <div class="list-workbench">
@@ -1032,7 +1034,7 @@ const REQS = [
   {m:'⑧ 大区-5', t:'n', req:'新增区域打标字段，按市场划分商品专区，3×2 分布产品图，more/图片跳对应列表页', impl:'SEA / ANZ / LATAM 三专区 Tab 切换，3×2 商品矩阵，卡片露出区域标；二跳列表页携带大区筛选', api:'商品域新增 regionTag 字段 → ES 同步过滤'},
   {m:'⑨ 定制产品-6', t:'n', req:'横向展示 5 款并显示拼单进度；抓取客户加购意向清单确定展示逻辑；楼层支持悬浮或常驻可见', impl:'5 款定制品带拼单进度条（10%~90%）+ 一键参团；右下角悬浮窗常驻露出 TOP3 拼单', api:'大数据 recSimInterestCart（加购兴趣）+ promotion 拼团 + ocshopping'},
   {m:'⑩ 特价产品-7', t:'n', req:'滞销品清仓专区；运营端新增维护入口，手动选择划定产品池', impl:'横滑特价专区，原价划线 / 特价红字对比 + SALE 角标', api:'运营端选品池 → tginfoMenu 栏目内容 / saleFlag 打标'},
-  {m:'⑪ 商品列表页', t:'u', req:'每一列表页上方设置品类分类导航；参考设计稿在商品区左侧设置筛选栏，标签等条件点击标题展开', impl:'保留顶部图片型分类导航；左侧新增标签、价格、尺寸、材质、颜色五组折叠筛选，支持预设值、区间输入、已选条件清除；右侧展示4列商品与Best Match/销量/价格/上新排序', api:'ES find.json 标签、价格、尺寸、材质、颜色过滤 + salesVolume6m 排序字段'},
+  {m:'⑪ 商品列表页', t:'u', req:'列表页品类导航上移；筛选入口放到左侧，筛选栏支持上下滚动；排序显示新品、爆款、特价、定制', impl:'移除列表页顶部面包屑与图片型空间导航；品类导航紧贴页头；左侧折叠筛选支持独立纵向滚动；四个业务标签可一键排序', api:'ES find.json 标签、价格、尺寸、材质、颜色过滤 + new/hot/sale/custom 业务标签排序'},
   {m:'⑫ 商品详情页', t:'k', req:'（未提优化，1:1 复刻）', impl:'缩略图列 + 主图轮播、Block/Custom 与 Variations/List Mode 分段控件、Color/Dim/Material 选择、QTY 步进器与 MOQ、Add to Shopping list、Description/Size Chart/Material/Installation/Recommend 标签页、Attributes 表格、场景大图轮播、Same Series/Category/Style 三组推荐', api:'/web/rs/resourceGoods · getResourceGoods + RsSku 规格'},
   {m:'⑬ 数据埋点', t:'n', req:'增设埋点，实现点击率与转化率等数据监测分析', impl:'全楼层交互均已挂埋点事件（楼层曝光 / 点击 / 加购 / 参团 / 筛选 / 选规格，楼层×商品维度，静默上报），控制台可查看事件流', api:'前端埋点 SDK → FlowData / 大数据平台回流分析'}
 ];
@@ -1045,7 +1047,7 @@ const byCode = c => GOODS.find(g => g.code === c);
 const palStyle = k => {const p=PAL[k]||PAL.beige;return `--c1:${p[0]};--c2:${p[1]};--c3:${p[2]}`};
 const state = {
   cart:new Map(), wish:new Set(),
-  filters:{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,src:null,chip:null,sort:'default',sortDir:-1,page:1},
+  filters:{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,src:null,chip:null,sort:'new',sortDir:-1,page:1},
   filterSidebarOpen:false,
   filterGroups:{tag:true,price:false,size:false,material:false,color:false},
   bannerIdx:0, noticeIdx:0, heroIdx:0, regionIdx:0, seriesIdx:0, catTab:0,
@@ -1335,12 +1337,14 @@ function closeCart(){$('#cartMask').classList.remove('show');$('#cartDrawer').cl
 /* ═══════════ 商品列表页 ═══════════ */
 function goList(p={}){
   const f=state.filters;
-  Object.assign(f,{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,src:null,chip:null,sort:'default',sortDir:-1,page:1});
+  Object.assign(f,{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,src:null,chip:null,sort:'new',sortDir:-1,page:1});
   if(p.cat) f.cat=p.cat;
   ['space','series','region','flag','kw','src','chip'].forEach(k=>{if(p[k])f[k]=p[k]});
   if(p.space) f.chip=p.space;
-  if(f.flag==='hot') f.sort='sales';
-  if(f.flag==='new'){f.sort='date';f.chip='New Arrivals'}
+  if(f.flag==='hot') f.sort='hot';
+  if(f.flag==='new'){f.sort='new';f.chip='New Arrivals'}
+  if(f.flag==='sale') f.sort='sale';
+  if(f.flag==='custom') f.sort='custom';
   switchView('list'); renderList(); window.scrollTo({top:0});
 }
 function filteredGoods(ignoreCat){
@@ -1378,10 +1382,6 @@ function renderChips(){
 }
 function renderList(){
   const f=state.filters;
-  const crumbName = f.flag?FLAGNAME[f.flag]:f.region?REGIONS.find(r=>r.short===f.region).name+' Zone':
-    f.series?f.series:f.space?f.space:(f.cat!=='All'?f.cat:'All Products');
-  $('#crumbCur').textContent = crumbName;
-  renderChips();
   /* 品类导览 Tab + 筛选收起按钮 */
   const base=filteredGoods(true);
   const tabs=[['All',base.length],...CATS.map(c=>[c.name,base.filter(g=>g.cat===c.name).length])];
@@ -1427,17 +1427,16 @@ function renderList(){
   bindRange('price','#priceMinRange','#priceMaxRange','#priceMinInput','#priceMaxInput');
   bindRange('size','#sizeMinRange','#sizeMaxRange','#sizeMinInput','#sizeMaxInput');
   /* 排序 */
-  const sorts=[['default','Best Match'],['sales','6-Month Sales'],['price','Price'],['date','Newest']];
+  const sorts=[['new','新品'],['hot','爆款'],['sale','特价'],['custom','定制']];
   const list=filteredGoods();
-  $('#sortbar').innerHTML='<span class="lb" style="width:86px;flex-shrink:0;color:var(--hint);font-size:12px">排序</span>'+
-    sorts.map(([k,n])=>`<span class="s-op${f.sort===k?' cur':''}" data-s="${k}">${n}${k==='price'?(f.sort==='price'?(f.sortDir>0?' ↑':' ↓'):' ⇅'):''}${k==='sales'&&f.sort==='sales'?' ↓':''}</span>`).join('')
-    +`<span class="cnt"><b>${list.length}</b> products</span>
-      <button class="btn-filter${state.filterSidebarOpen?' on':''}" id="btnFilter" type="button" aria-expanded="${state.filterSidebarOpen}">
+  $('#sortbar').innerHTML=`<button class="btn-filter${state.filterSidebarOpen?' on':''}" id="btnFilter" type="button" aria-expanded="${state.filterSidebarOpen}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
-        筛选${fn?`<b>${fn}</b>`:''}<i class="caret">${state.filterSidebarOpen?'◀':'▶'}</i></button>`;
+        筛选${fn?`<b>${fn}</b>`:''}<i class="caret">${state.filterSidebarOpen?'◀':'▶'}</i></button>`+
+    '<span class="lb" style="width:52px;flex-shrink:0;color:var(--hint);font-size:12px">排序</span>'+ 
+    sorts.map(([k,n])=>`<span class="s-op${f.sort===k?' cur':''}" data-s="${k}">${n}</span>`).join('')+
+    `<span class="cnt"><b>${list.length}</b> products</span>`;
   $$('#sortbar .s-op').forEach(s=>s.addEventListener('click',()=>{
     const k=s.dataset.s;
-    if(k==='price'&&f.sort==='price')f.sortDir*=-1;else f.sortDir=k==='price'?1:-1;
     f.sort=k;f.page=1;track('列表页','排序',k);renderList()}));
   $('#btnFilter').addEventListener('click',()=>{
     state.filterSidebarOpen=!state.filterSidebarOpen;
@@ -1469,9 +1468,10 @@ function renderList(){
     Object.assign(f,{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,chip:null,page:1});renderList()});
   /* 网格 */
   const sorted=[...list];
-  if(f.sort==='sales')sorted.sort((a,b)=>b.sales6m-a.sales6m);
-  else if(f.sort==='price')sorted.sort((a,b)=>(a.price-b.price)*f.sortDir);
-  else if(f.sort==='date')sorted.sort((a,b)=>b.hdate.localeCompare(a.hdate));
+  if(f.sort==='new')sorted.sort((a,b)=>(b.flags.includes('new')-a.flags.includes('new'))||b.hdate.localeCompare(a.hdate));
+  else if(f.sort==='hot')sorted.sort((a,b)=>(b.flags.includes('hot')-a.flags.includes('hot'))||b.sales6m-a.sales6m);
+  else if(f.sort==='sale')sorted.sort((a,b)=>(b.flags.includes('sale')-a.flags.includes('sale'))||((b.oldPrice?b.oldPrice-b.price:0)-(a.oldPrice?a.oldPrice-a.price:0)));
+  else if(f.sort==='custom')sorted.sort((a,b)=>(b.flags.includes('custom')-a.flags.includes('custom'))||((b.progress||0)-(a.progress||0))||b.sales6m-a.sales6m);
   else sorted.sort((a,b)=>(b.flags.length*4000+b.sales6m)-(a.flags.length*4000+a.sales6m));
   const pages=Math.max(1,Math.ceil(sorted.length/PER_PAGE));
   if(f.page>pages)f.page=1;
