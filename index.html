@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LINSY BPS Mall · 商城端优化交互 Demo</title>
+<style>
+:root{
+  --mint:#3ADFCD;            /* 顶部服务条 / 主按钮 */
+  --mint-d:#22CDBB;          /* 按钮 hover */
+  --mint-soft:#E8FAF7;       /* 浅底 */
+  --mint-line:#BDEFE8;
+  --brand:#14C3BC;           /* LINSY logo */
+  --teal-txt:#10AAA2;        /* 交期 / MOQ 文案 */
+  --teal-h:#0F9AA6;          /* All Categories 标题 */
+  --teal-deep:#0E8F87;       /* 选中态 / 分页当前页 */
+  --ink:#333333; --ink2:#555; --sub:#888; --faint:#999; --hint:#AAA;
+  --line:#E8E8E8; --line2:#F0F0F0; --bg:#FFFFFF; --gray:#F7F7F7;
+  --hot:#FF4E28; --sale:#E6392E; --nnew:#1670C9; --cust:#7A5AF8;
+  --shadow-h:0 6px 20px rgba(0,0,0,.10);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:"Poppins","Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+  background:#fff;color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+ul{list-style:none}
+.wrap{width:1400px;max-width:calc(100% - 40px);margin:0 auto}
+.hidden{display:none!important}
+
+/* ══════ Demo 工具条 ══════ */
+#demoBar{background:#14161A;color:#D8DBDF;font-size:12px;position:sticky;top:0;z-index:600}
+#demoBar .wrap{display:flex;align-items:center;gap:16px;height:36px}
+#demoBar .dot{width:7px;height:7px;border-radius:50%;background:#38C172;box-shadow:0 0 6px #38C172}
+#demoBar b{color:#fff;font-weight:600}
+#demoBar .spacer{flex:1}
+.switch{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none;color:#C3C8CE}
+.switch .tk{width:28px;height:15px;border-radius:8px;background:#3A3F45;position:relative;transition:.2s}
+.switch .tk::after{content:"";position:absolute;width:11px;height:11px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.2s}
+.switch.on .tk{background:var(--mint)}
+.switch.on .tk::after{left:15px}
+#demoBar .btn-plain{color:#fff;background:#2A2E34;padding:3px 12px;border-radius:20px;font-size:12px;transition:.2s}
+#demoBar .btn-plain:hover{background:var(--teal-deep)}
+
+/* ══════ 顶部服务条 ══════ */
+#utilBar{background:var(--mint);font-size:11.5px;color:#1A4B47}
+#utilBar .wrap{display:flex;align-items:center;height:28px;gap:8px}
+#utilBar .r{margin-left:auto;display:flex;align-items:center;gap:0}
+#utilBar .r>*{padding:0 9px;position:relative}
+#utilBar .r>*+*::before{content:"";position:absolute;left:0;top:3px;bottom:3px;width:1px;background:rgba(26,75,71,.28)}
+#utilBar a{cursor:pointer}
+#utilBar a:hover{text-decoration:underline}
+
+/* ══════ 页头 ══════ */
+header.site{background:#fff;position:sticky;top:36px;z-index:500;border-bottom:1px solid #F2F2F2}
+.nav-row{display:flex;align-items:center;height:56px;gap:0}
+.logo{display:flex;align-items:baseline;gap:6px;flex-shrink:0;cursor:pointer;margin-right:34px}
+.logo .en{font-size:25px;font-weight:600;letter-spacing:1.5px;color:var(--brand);line-height:1}
+.logo .cn{font-size:21px;font-weight:600;color:var(--brand);line-height:1}
+nav.main{display:flex;gap:0;flex-shrink:0}
+nav.main a{padding:6px 19px;font-size:14.5px;color:#4A4A4A;cursor:pointer;transition:.15s;position:relative;display:inline-flex;align-items:center}
+nav.main a:hover{color:var(--teal-deep)}
+nav.main a.active{color:#1A1A1A;font-weight:600}
+.searchbox{margin-left:auto;width:270px;position:relative;flex-shrink:0}
+.searchbox .inp{display:flex;align-items:center;border:1px solid #E2E2E2;border-radius:19px;background:#fff;transition:.2s;overflow:hidden}
+.searchbox .inp:focus-within{border-color:var(--mint)}
+.searchbox input{flex:1;border:none;outline:none;padding:8px 18px;font-size:12.5px;background:transparent;color:var(--ink)}
+.searchbox input::placeholder{color:#B5B5B5}
+.searchbox .go{color:#7A7A7A;padding:7px 15px 7px 6px;flex-shrink:0;display:flex}
+.searchbox .go:hover{color:var(--teal-deep)}
+.sug{position:absolute;top:42px;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow-h);padding:12px 14px;display:none;z-index:20}
+.sug.show{display:block}
+.sug .h{font-size:11px;color:var(--hint);margin-bottom:8px;letter-spacing:.5px}
+.sug .kw{display:inline-block;margin:0 6px 6px 0;padding:4px 12px;background:var(--gray);border-radius:12px;font-size:11.5px;color:#5A5A5A;cursor:pointer}
+.sug .kw:hover{background:var(--mint-soft);color:var(--teal-deep)}
+nav.main a .badge-n{position:absolute;top:-3px;right:4px;min-width:15px;height:15px;border-radius:8px;background:var(--hot);color:#fff;
+  font-size:9.5px;display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700}
+
+/* ══════ ① 通知栏（新增） ══════ */
+#noticeBar{background:var(--mint-soft);border-bottom:1px solid var(--mint-line)}
+#noticeBar .wrap{display:flex;align-items:center;height:34px;gap:10px}
+#noticeBar .ic{color:var(--teal-deep);flex-shrink:0;display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;letter-spacing:.5px}
+.notice-viewport{flex:1;height:34px;overflow:hidden}
+.notice-track{transition:transform .5s ease}
+.notice-item{height:34px;display:flex;align-items:center;font-size:12px;color:#0C6E68;cursor:pointer;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notice-item:hover{text-decoration:underline}
+.notice-item .tg{background:#C7F2EC;color:#0A6058;font-size:10px;padding:1px 8px;border-radius:9px;flex-shrink:0;font-weight:600}
+#noticeClose{color:#5FB5AC;font-size:14px;padding:3px 6px;border-radius:5px}
+#noticeClose:hover{background:rgba(0,0,0,.05)}
+
+/* ══════ 楼层标题（现网：细体、居中、深灰） ══════ */
+section.floor{margin-top:46px;position:relative}
+.floor-hd{text-align:center;margin-bottom:20px;position:relative}
+.floor-hd h2{font-size:31px;font-weight:400;color:#2E2E2E;letter-spacing:.2px}
+.floor-hd h2 em{font-style:normal;color:var(--teal-txt)}
+.floor-hd .sub{font-size:11.5px;color:var(--hint);margin-top:5px}
+.floor-hd .more{display:inline-flex;align-items:center;gap:3px;margin-top:6px;font-size:12.5px;color:#7A7A7A;cursor:pointer;transition:.15s}
+.floor-hd .more:hover{color:var(--teal-deep);gap:6px}
+
+/* ══════ 商品卡（现网 1:1） ══════ */
+.pcard{background:#fff;cursor:pointer;position:relative;display:flex;flex-direction:column;min-width:0;
+  padding:8px 10px 14px;border:1px solid transparent;border-radius:3px;transition:box-shadow .2s,border-color .2s}
+.pcard:hover{box-shadow:var(--shadow-h);border-color:#EDEDED;z-index:3}
+.pc-head{display:flex;align-items:center;height:18px;margin-bottom:4px}
+.bb{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#3A3A3A;white-space:nowrap}
+.bb .lg{background:var(--mint);color:#fff;font-weight:700;font-size:9px;padding:1.5px 4px;letter-spacing:.3px;line-height:1.15}
+.corner{margin-left:auto;font-size:10px;font-weight:700;color:#fff;padding:2px 9px;border-radius:3px;letter-spacing:.4px}
+.corner.hot{background:var(--hot)}
+.corner.new{background:var(--nnew)}
+.corner.sale{background:var(--sale)}
+.corner.custom{background:var(--cust)}
+.pimg{height:186px;display:flex;align-items:center;justify-content:center;position:relative;background:#fff;overflow:hidden}
+.pimg>svg{width:172px;height:138px;transition:transform .35s}
+.pcard:hover .pimg>svg{transform:scale(1.06)}
+.rgs{position:absolute;bottom:2px;left:0;display:flex;gap:4px}
+.rg-tag{font-size:9px;background:var(--mint-soft);color:#0C6E68;border:1px solid var(--mint-line);padding:0 5px;border-radius:2px;font-weight:600;line-height:15px}
+.sw{display:flex;gap:5px;margin-top:9px;min-height:15px}
+.sw i{width:15px;height:15px;border:1px solid #DCDCDC;border-radius:2px;cursor:pointer;transition:.15s}
+.sw i:hover,.sw i.on{border-color:var(--teal-deep);box-shadow:0 0 0 1px var(--teal-deep)}
+.pn{display:flex;align-items:center;gap:6px;margin-top:8px}
+.pn .nm{font-size:13.5px;color:#333;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+.pcard:hover .pn .nm{color:var(--teal-deep)}
+.wish{color:#C8C8C8;flex-shrink:0;display:flex;transition:.15s}
+.wish:hover{color:var(--hot)}
+.wish.on{color:var(--hot)}
+.wish.on svg{fill:var(--hot)}
+.wish svg{width:16px;height:16px}
+.pp{margin-top:6px;color:#1F1F1F;display:flex;align-items:baseline;gap:1px}
+.pp .c{font-size:12px;margin-right:2px}
+.pp b{font-size:23px;font-weight:600;line-height:1}
+.pp .d{font-size:13px;font-weight:600}
+.pp .u{font-size:11px;color:var(--faint);font-weight:400;margin-left:4px}
+.pp .old{font-size:11.5px;color:var(--faint);text-decoration:line-through;margin-left:6px}
+.pp.red b,.pp.red .c,.pp.red .d{color:var(--sale)}
+.pd{font-size:11.5px;color:var(--teal-txt);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pd b{font-weight:600}
+.pi{font-size:11px;color:#AFAFAF;margin-top:3px}
+.pi .s6{color:#C4C4C4}
+.addcart{position:absolute;right:10px;bottom:12px;width:30px;height:30px;border-radius:50%;background:var(--mint);color:#fff;
+  display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(4px);transition:.2s;box-shadow:0 3px 10px rgba(58,223,205,.5)}
+.pcard:hover .addcart{opacity:1;transform:translateY(0)}
+.addcart:hover{background:var(--mint-d)}
+.addcart svg{width:15px;height:15px}
+/* 拼单进度 */
+.gb-progress{margin-top:8px}
+.gb-progress .lbl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--sub);margin-bottom:3px}
+.gb-progress .lbl b{color:var(--teal-deep)}
+.gb-bar{height:5px;border-radius:3px;background:#EDEDED;overflow:hidden}
+.gb-bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--mint),var(--teal-deep));width:0;transition:width .9s cubic-bezier(.2,.7,.3,1)}
+.gb-join{margin-top:8px;width:100%;padding:7px 0;border-radius:3px;background:var(--mint);color:#fff;font-size:12px;font-weight:600;transition:.15s}
+.gb-join:hover{background:var(--mint-d)}
+
+/* 网格 / 横滑 */
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px 4px}
+.hscroll{position:relative}
+.hs-track{display:flex;gap:4px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;padding:2px 0 6px}
+.hs-track::-webkit-scrollbar{display:none}
+.hs-track>.pcard{flex:0 0 calc((100% - 16px)/5)}
+.hs-arrow{position:absolute;top:34%;width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid var(--line);
+  box-shadow:0 2px 10px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;z-index:5;color:#555;transition:.15s}
+.hs-arrow:hover{background:var(--mint);border-color:var(--mint);color:#fff}
+.hs-arrow.prev{left:-17px}.hs-arrow.next{right:-17px}
+.hs-arrow.off{opacity:.2;pointer-events:none}
+
+/* ══════ ② Banner ══════ */
+.banner{position:relative;overflow:hidden;height:420px}
+.b-slide{position:absolute;inset:0;opacity:0;transition:opacity .6s;z-index:1}
+.b-slide.cur{opacity:1;z-index:2}
+.b-inner{width:1400px;max-width:100%;margin:0 auto;height:100%;position:relative;padding:0 20px}
+.b-date{position:absolute;left:24px;top:36px;color:#fff;font-size:13px;line-height:1.45}
+.b-date .k{color:var(--mint);font-weight:700;font-size:19px}
+.b-date b{display:block;font-size:19px;font-weight:600}
+.b-date .to{opacity:.9}
+.b-logos{position:absolute;left:250px;top:40px;display:flex;align-items:center;gap:10px}
+.b-logos .l1{background:var(--mint);color:#fff;font-weight:700;font-size:12px;padding:3px 11px;letter-spacing:1px}
+.b-logos .x{color:#fff;font-weight:500;font-size:15px}
+.b-logos .l2{background:#FF3B57;color:#fff;font-weight:700;font-size:12px;padding:3px 11px;border-radius:11px}
+.b-tx{position:absolute;left:250px;top:78px;max-width:580px;color:#fff}
+.b-tx h3{font-size:46px;font-weight:700;letter-spacing:.5px;line-height:1.14;text-shadow:0 2px 12px rgba(0,0,0,.14)}
+.b-tx p{margin-top:12px;font-size:14.5px;opacity:.95;line-height:1.5}
+.b-tx .bullets{margin-top:16px;font-size:12.5px}
+.b-tx .bl{margin-bottom:9px}
+.b-tx .bl .k{color:var(--mint);font-weight:700;display:flex;align-items:center;gap:6px}
+.b-tx .bl .k::before{content:"•";font-size:17px}
+.b-tx .bl .v{opacity:.94;margin-left:13px;line-height:1.5}
+.b-cta{display:inline-flex;align-items:center;gap:6px;margin-top:15px;background:#fff;color:#0C6E68;padding:9px 24px;border-radius:20px;font-size:13px;font-weight:600;transition:.2s;cursor:pointer}
+.b-cta:hover{gap:10px;background:var(--mint);color:#fff}
+.b-qr{position:absolute;left:24px;bottom:34px;display:flex;flex-direction:column;gap:7px;align-items:flex-start}
+.b-qr .qr{width:60px;height:60px;background:#fff;padding:4px}
+.b-qr .qr i{display:block;width:100%;height:100%;background:
+  repeating-linear-gradient(0deg,#0A6E66 0 3px,transparent 3px 6px),
+  repeating-linear-gradient(90deg,#0A6E66 0 3px,#fff 3px 6px)}
+.b-qr span{color:#fff;font-size:10px;letter-spacing:1.6px;opacity:.92}
+.b-deco{position:absolute;right:-60px;top:-90px;width:500px;height:500px;border-radius:50%;background:rgba(255,255,255,.09)}
+.b-deco2{position:absolute;right:160px;bottom:-150px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.06)}
+.b-ic{position:absolute;right:80px;top:50%;transform:translateY(-50%);opacity:.26;color:#fff;z-index:1}
+.b-ic svg{width:260px;height:260px}
+.b-dots{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:7px;z-index:5}
+.b-dots i{width:7px;height:7px;border-radius:4px;background:rgba(255,255,255,.55);cursor:pointer;transition:.2s}
+.b-dots i.cur{background:#fff;width:20px}
+.b-arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);
+  color:#fff;display:flex;align-items:center;justify-content:center;z-index:5;transition:.2s;backdrop-filter:blur(3px)}
+.b-arrow:hover{background:rgba(255,255,255,.45)}
+.b-arrow.prev{left:18px}.b-arrow.next{right:18px}
+
+/* ══════ ③ 分类导览（圆形，现网样式） ══════ */
+#catNav{margin-top:34px;position:relative;z-index:60}
+.catbar{position:relative;display:flex;align-items:flex-start;justify-content:center;gap:2px}
+.cs-item{width:132px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:4px 2px;cursor:pointer}
+.cs-item .cir{width:70px;height:70px;border-radius:50%;border:1px solid #DDEFF5;background:#fff;display:flex;align-items:center;
+  justify-content:center;color:#3B8FB3;font-size:10.5px;text-align:center;line-height:1.2;padding:6px;transition:.22s;font-weight:500}
+.cs-item span{font-size:12.5px;color:#4A4A4A;text-align:center}
+.cs-item:hover .cir,.cs-item.open .cir{border-color:var(--mint);color:var(--teal-deep);box-shadow:0 6px 16px rgba(58,223,205,.28);transform:translateY(-3px)}
+.cs-item:hover span,.cs-item.open span{color:var(--teal-deep)}
+/* 大区专区导航：与空间分类同一行、同样式，竖线分隔 */
+.cat-divider{width:1px;background:var(--line);align-self:stretch;margin:10px 16px}
+.zone-nav{display:flex;align-items:flex-start;flex-shrink:0}
+.cs-item.rgn{width:126px}
+.cs-item.rgn .cir{background:var(--mint-soft);border-color:var(--mint-line);font-size:27px}
+.cs-item.rgn span{font-size:11.5px;white-space:nowrap}
+.megamenu{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:6px;
+  box-shadow:0 16px 42px rgba(0,0,0,.13);padding:20px 24px;display:none;z-index:70}
+.megamenu.show{display:block}
+.mm-h{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+.mm-h b{font-size:15px;font-weight:600}
+.mm-h span{font-size:11.5px;color:var(--hint)}
+.mm-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}
+.mm-cell{border:1px solid #F0F0F0;border-radius:5px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:.15s;background:#fff}
+.mm-cell:hover{border-color:var(--mint);background:var(--mint-soft);transform:translateY(-3px)}
+.mm-cell svg{width:44px;height:36px}
+.mm-cell b{font-size:12.5px;font-weight:500}
+.mm-cell i{font-style:normal;font-size:10.5px;color:var(--hint)}
+.mm-foot{margin-top:13px;padding-top:11px;border-top:1px dashed var(--line);font-size:11.5px;color:var(--hint);display:flex;gap:8px;align-items:center}
+.mm-foot a{color:var(--teal-deep);cursor:pointer;font-weight:600}
+
+/* ══════ ④ 品类推荐（Redefining Home Living 版式） ══════ */
+.cat-tabs{display:flex;justify-content:center;gap:26px;margin-bottom:18px}
+.ct-tab{font-size:13px;color:#8A8A8A;cursor:pointer;padding-bottom:5px;border-bottom:2px solid transparent;transition:.15s}
+.ct-tab:hover{color:var(--teal-deep)}
+.ct-tab.cur{color:#2E2E2E;border-bottom-color:var(--mint);font-weight:500}
+.cat-rec{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cr-hero{border-radius:4px;overflow:hidden;position:relative;cursor:default;min-height:400px;display:flex;flex-direction:column;justify-content:flex-end;padding:24px;transition:.3s}
+.cr-hero:hover{box-shadow:var(--shadow-h)}
+.cr-hero .big-ic{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%)}
+.cr-hero .big-ic svg{width:280px;height:220px;transition:.35s}
+.cr-hero:hover .big-ic svg{transform:scale(1.05)}
+.cr-hero .hero-tx{position:relative;z-index:2}
+.cr-hero .hero-tx .en{font-size:10.5px;letter-spacing:3px;color:rgba(0,0,0,.4);text-transform:uppercase}
+.cr-hero .hero-tx .cn{font-size:26px;font-weight:500;margin-top:3px}
+.cr-hero .hero-tx p{font-size:12.5px;color:rgba(0,0,0,.55);margin-top:6px}
+.cr-hero .gobtn{display:inline-flex;align-items:center;gap:6px;margin-top:13px;background:#fff;padding:8px 20px;border-radius:18px;font-size:12.5px;font-weight:600;transition:.2s;color:#2E2E2E}
+.cr-hero:hover .gobtn{background:var(--mint);color:#fff;gap:10px}
+.cr-cells{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:14px}
+.cr-cell{background:#FAFAFA;border-radius:4px;padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:default;transition:.2s;position:relative}
+.cr-cell:hover{background:var(--mint-soft);transform:translateY(-3px);box-shadow:var(--shadow-h)}
+.cr-cell.cur{background:var(--mint-soft);box-shadow:inset 0 0 0 1px var(--mint)}
+.cr-cell svg{width:100px;height:78px;transition:.25s}
+.cr-cell:hover svg{transform:scale(1.08)}
+.cr-cell b{font-size:13px;font-weight:500;color:#3A3A3A}
+.cr-cell i{font-style:normal;font-size:10.5px;color:var(--hint)}
+.cr-more{position:absolute;right:14px;bottom:12px;display:inline-flex;align-items:center;gap:3px;
+  justify-content:center;min-width:66px;padding:7px 13px;border:1px solid #EFEFEF;border-radius:18px;
+  background:#fff;color:#333;font-size:11.5px;line-height:1;cursor:pointer;
+  box-shadow:0 2px 7px rgba(0,0,0,.04);transition:background .18s,border-color .18s,color .18s,gap .18s,box-shadow .18s}
+.cr-more svg{width:10px;height:10px}
+.cr-more:hover,.cr-more:focus-visible{background:var(--mint);border-color:var(--mint);color:#fff;gap:6px;
+  box-shadow:0 4px 12px rgba(58,223,205,.35);outline:none}
+
+/* ══════ ⑤ 系列推荐（手风琴） ══════ */
+.series-acc{display:flex;gap:5px;height:330px}
+.sp{flex:1;border-radius:3px;overflow:hidden;position:relative;cursor:pointer;transition:flex .5s cubic-bezier(.25,.8,.3,1)}
+.sp.open{flex:3.2}
+.sp .bgic{position:absolute;right:-14px;bottom:-14px;opacity:.3}
+.sp .bgic svg{width:150px;height:120px}
+.sp .lbl{position:absolute;left:16px;bottom:16px;z-index:2;transition:.2s}
+.sp .lbl b{font-size:15px;font-weight:600;color:#2E2E2E;display:block;line-height:1.3}
+.sp .lbl .mo{font-size:10.5px;color:rgba(0,0,0,.5);letter-spacing:1px}
+.sp .big{position:absolute;left:26px;top:30px;right:26px;opacity:0;transition:opacity .35s .1s;z-index:2}
+.sp.open .big{opacity:1}
+.sp.open .lbl{opacity:0}
+.sp .big .bn{font-size:27px;font-weight:600;color:#2E2E2E}
+.sp .big .tg{font-size:13px;color:rgba(0,0,0,.55);margin-top:6px}
+.sp .big .cnt{font-size:11px;color:rgba(0,0,0,.4);margin-top:4px}
+.sp .big .mo2{display:inline-flex;align-items:center;gap:5px;margin-top:14px;background:#fff;padding:7px 18px;border-radius:16px;font-size:12px;font-weight:600;transition:.2s}
+.sp .big .mo2:hover{background:var(--mint);color:#fff}
+
+/* ══════ ⑧ 大区 ══════ */
+.region-tabs{display:flex;gap:10px;margin-bottom:14px;justify-content:center}
+.rt{padding:7px 24px;border-radius:19px;background:#fff;border:1px solid #DEDEDE;font-size:13.5px;color:#5A5A5A;cursor:pointer;transition:.18s;display:flex;align-items:center;gap:7px}
+.rt:hover{border-color:var(--mint);color:var(--teal-deep)}
+.rt.cur{background:var(--mint);border-color:var(--mint);color:#fff;font-weight:600;box-shadow:0 4px 12px rgba(58,223,205,.35)}
+.rt .more-in{font-size:10.5px;opacity:.8}
+.region-note{text-align:center;font-size:11px;color:var(--hint);margin-bottom:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 4px}
+.grid3 .pimg{height:200px}
+.grid3 .pimg>svg{width:180px;height:140px}
+.region-more{margin-top:16px;text-align:center}
+.btn-outline{padding:9px 34px;border-radius:20px;border:1px solid var(--mint);color:var(--teal-deep);font-size:13px;font-weight:600;transition:.18s;background:#fff}
+.btn-outline:hover{background:var(--mint);color:#fff}
+.sale-strip{background:#FCFCFC;border-radius:6px;padding:12px 14px}
+
+/* ══════ 页尾 ══════ */
+footer.site{margin-top:60px;background:#333333;color:#A9A9A9;padding:44px 0 22px}
+footer .cols{display:grid;grid-template-columns:1.5fr 1fr 1fr 1.1fr 1.3fr;gap:26px}
+footer h5{color:#fff;font-size:14px;margin-bottom:15px;font-weight:600}
+footer li{font-size:12px;margin-bottom:9px;cursor:pointer;color:#A9A9A9}
+footer li:hover{color:#fff;text-decoration:underline}
+footer .brand-blk .lg{display:flex;align-items:baseline;gap:6px;margin-bottom:16px}
+footer .brand-blk .lg .en{color:#fff;font-size:19px;font-weight:600;letter-spacing:1.5px}
+footer .brand-blk .lg .cn{color:#fff;font-size:16px;font-weight:600}
+footer .ct{font-size:11px;color:#7E7E7E}
+footer .tel{font-size:13.5px;color:#C8C8C8;margin-top:3px}
+footer .soc{display:flex;gap:7px;margin-top:16px}
+footer .soc i{width:20px;height:20px;border-radius:50%;border:1px solid #6A6A6A;display:flex;align-items:center;justify-content:center;font-size:10px;font-style:normal;cursor:pointer;color:#9A9A9A}
+footer .soc i:hover{border-color:var(--mint);color:var(--mint)}
+footer .copy{border-top:1px solid #444;margin-top:32px;padding-top:16px;font-size:11px;color:#777;display:flex;justify-content:space-between}
+
+/* ══════ 定制悬浮窗 / 返回顶部 ══════ */
+#gbFloat{position:fixed;right:14px;bottom:82px;z-index:430;width:206px;background:#fff;border:1px solid var(--mint-line);
+  border-radius:8px;box-shadow:0 12px 34px rgba(14,143,135,.2);overflow:hidden;transition:transform .3s,opacity .3s}
+#gbFloat.hide{transform:translateX(260px);opacity:0;pointer-events:none}
+#gbFloat .hd{background:var(--mint);color:#fff;padding:8px 12px;font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+#gbFloat .hd .x{margin-left:auto;color:rgba(255,255,255,.85);font-size:13px;cursor:pointer}
+#gbFloat .bd{padding:10px 12px}
+#gbFloat .it{margin-bottom:10px;cursor:pointer}
+#gbFloat .it .nm{font-size:11.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#gbFloat .it .gb-bar{margin-top:4px;height:4px}
+#gbFloat .it .pc{display:flex;justify-content:space-between;font-size:10px;color:var(--hint);margin-top:3px}
+#gbFloat .goall{width:100%;padding:6px 0;border-radius:4px;background:var(--mint-soft);color:var(--teal-deep);font-size:11.5px;font-weight:600}
+#gbFloat .goall:hover{background:#D3F6F1}
+#backTop{position:fixed;right:14px;bottom:24px;width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid var(--line);
+  box-shadow:var(--shadow-h);display:flex;align-items:center;justify-content:center;color:#555;z-index:430;opacity:0;pointer-events:none;transition:.25s}
+#backTop.show{opacity:1;pointer-events:auto}
+#backTop:hover{background:var(--mint);border-color:var(--mint);color:#fff}
+
+/* ══════ 列表页 ══════ */
+#viewList{padding-bottom:20px}
+.crumb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--hint);padding:14px 0 4px}
+.crumb a{color:#6A6A6A;cursor:pointer}
+.crumb a:hover{color:var(--teal-deep)}
+.crumb b{color:var(--ink);font-weight:500}
+.allcat-h{font-size:16px;font-weight:600;color:var(--teal-h);margin:14px 0 14px}
+.catchips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px}
+.cchip{display:flex;align-items:center;gap:8px;padding:8px 16px 8px 8px;border:1px solid #E4E4E4;border-radius:6px;background:#fff;
+  cursor:pointer;font-size:13.5px;color:#3A3A3A;transition:.18s}
+.cchip:hover{border-color:var(--mint);color:var(--teal-deep);box-shadow:0 4px 12px rgba(58,223,205,.2)}
+.cchip.cur{border-color:var(--mint);background:var(--mint-soft);color:var(--teal-deep);font-weight:600}
+.cchip .th{width:34px;height:24px;border-radius:3px;background:#F2F2F2;display:flex;align-items:center;justify-content:center;
+  font-size:6px;color:#9A9A9A;overflow:hidden;flex-shrink:0}
+.cchip .th svg{width:30px;height:22px}
+/* 优化项：品类导览 Tab + 筛选栏 */
+.opt-block{border:1px dashed var(--mint);border-radius:6px;padding:2px 14px;margin-top:14px;background:#FCFFFE;position:relative}
+.opt-flag{position:absolute;top:-9px;left:14px;background:var(--mint);color:#fff;font-size:10px;font-weight:600;padding:1px 9px;border-radius:9px}
+body:not(.anno) .opt-block{border-color:transparent;background:#fff;padding-left:0;padding-right:0}
+body:not(.anno) .opt-flag{display:none}
+.lc-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:11px 0 9px}
+.lc-row .lb{font-size:12px;color:var(--hint);width:86px;flex-shrink:0}
+.tb-spacer{flex:1;min-width:12px}
+.btn-filter{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 15px;border:1px solid #DFE1E3;border-radius:15px;
+  font-size:12.5px;color:#4A4A4A;background:#fff;transition:.16s;flex-shrink:0}
+.btn-filter:hover{border-color:var(--mint);color:var(--teal-deep)}
+.btn-filter.on{background:var(--mint-soft);border-color:var(--mint);color:var(--teal-deep);font-weight:600}
+.btn-filter b{background:var(--mint);color:#fff;font-size:10.5px;min-width:17px;height:17px;border-radius:9px;
+  display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
+.btn-filter .caret{font-size:9px;font-style:normal;opacity:.6}
+.btn-filter svg{width:13px;height:13px}
+.fpanel{border-top:1px dashed #EFEFEF;animation:fpin .2s}
+@keyframes fpin{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.lc-tab{padding:5px 15px;border-radius:15px;font-size:12.5px;color:#4A4A4A;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:5px}
+.lc-tab:hover{color:var(--teal-deep);background:var(--mint-soft)}
+.lc-tab.cur{background:var(--mint);color:#fff;font-weight:600}
+.lc-tab .c{font-size:10px;opacity:.75}
+.f-row{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-top:1px dashed #F0F0F0;font-size:12.5px}
+.f-ops{display:flex;flex-wrap:wrap;gap:2px;flex:1}
+.f-op{padding:4px 12px;border-radius:13px;cursor:pointer;color:#4A4A4A;transition:.13s}
+.f-op:hover{color:var(--teal-deep)}
+.f-op.cur{background:var(--mint-soft);color:var(--teal-deep);font-weight:600}
+.sortbar{display:flex;align-items:center;gap:4px;padding:10px 0;border-top:1px dashed #F0F0F0}
+.s-op{padding:5px 14px;border-radius:4px;font-size:12.5px;color:#4A4A4A;cursor:pointer;display:flex;align-items:center;gap:3px;transition:.13s}
+.s-op:hover{color:var(--teal-deep)}
+.s-op.cur{background:var(--mint);color:#fff;font-weight:600}
+.sortbar .cnt{margin-left:auto;font-size:12px;color:var(--hint)}
+.sortbar .cnt b{color:var(--teal-deep);font-size:14px}
+.active-chips{display:flex;gap:7px;padding:8px 0 0;flex-wrap:wrap;align-items:center;font-size:12px;color:#6A6A6A}
+.a-chip{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--mint);color:var(--teal-deep);border-radius:13px;padding:3px 11px;font-size:11.5px}
+.a-chip .x{cursor:pointer;font-weight:700}
+.a-clear{font-size:11.5px;color:var(--hint);cursor:pointer;text-decoration:underline}
+.a-clear:hover{color:var(--teal-deep)}
+.list-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px 4px;margin-top:14px}
+.empty{padding:70px 0;text-align:center;color:var(--hint)}
+.empty svg{width:70px;height:56px;opacity:.35;margin-bottom:12px}
+.pager{display:flex;justify-content:center;align-items:center;gap:6px;margin:34px 0 8px}
+.pg{min-width:30px;height:30px;border-radius:4px;border:1px solid #E4E4E4;background:#fff;display:flex;align-items:center;
+  justify-content:center;font-size:12.5px;color:#4A4A4A;cursor:pointer;transition:.15s;padding:0 8px}
+.pg:hover{border-color:var(--mint);color:var(--teal-deep)}
+.pg.cur{background:var(--teal-deep);border-color:var(--teal-deep);color:#fff;font-weight:600}
+.pg.dis{opacity:.4;pointer-events:none}
+.pg.dots{border:none;background:none;cursor:default}
+
+/* ══════ 详情页 ══════ */
+#viewDetail{padding-bottom:20px}
+.dt-top{display:grid;grid-template-columns:64px 1fr 470px;gap:18px;margin-top:10px}
+.dt-thumbs{display:flex;flex-direction:column;gap:7px}
+.dt-thumbs .th{width:64px;height:64px;border:1px solid #E6E6E6;border-radius:2px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;background:#fff}
+.dt-thumbs .th svg{width:52px;height:42px}
+.dt-thumbs .th:hover{border-color:var(--mint)}
+.dt-thumbs .th.cur{border-color:var(--mint);box-shadow:0 0 0 1px var(--mint)}
+.dt-main{position:relative;background:#fff;border:1px solid #F2F2F2;border-radius:2px;display:flex;align-items:center;justify-content:center;min-height:430px;overflow:hidden}
+.dt-main svg.dt-prod{width:430px;height:344px;transition:transform .35s}
+.dt-main:hover svg.dt-prod{transform:scale(1.05)}
+.dt-main .arw{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:52px;background:rgba(0,0,0,.28);color:#fff;
+  display:flex;align-items:center;justify-content:center;transition:.15s}
+.dt-main .arw:hover{background:rgba(0,0,0,.5)}
+.dt-main .arw.prev{left:0}.dt-main .arw.next{right:0}
+.dt-info h1{font-size:19px;font-weight:600;color:#2A2A2A;line-height:1.4}
+.dt-meta{font-size:11.5px;color:var(--faint);margin-top:6px}
+.dt-meta span+span::before{content:"|";margin:0 8px;color:#DDD}
+.seg{display:flex;margin-top:14px;border-radius:2px;overflow:hidden}
+.seg button{flex:1;padding:8px 0;font-size:13px;background:#EFEFEF;color:#7A7A7A;transition:.15s}
+.seg button:hover{color:var(--teal-deep)}
+.seg button.cur{background:var(--mint);color:#fff;font-weight:600}
+.dt-price{margin-top:16px;display:flex;align-items:baseline;gap:2px}
+.dt-price b{font-size:34px;font-weight:600;color:#1F1F1F;line-height:1}
+.dt-price .d{font-size:18px;font-weight:600}
+.dt-price .u{font-size:12px;color:var(--faint);margin-left:5px}
+.dt-price .old{font-size:14px;color:var(--faint);text-decoration:line-through;margin-left:8px}
+.dt-spec{font-size:11.5px;color:#6A6A6A;margin-top:10px;line-height:1.9}
+.dt-spec span+span::before{content:"|";margin:0 8px;color:#E0E0E0}
+.dt-group{margin-top:14px}
+.dt-group .lb{font-size:12px;color:#6A6A6A;margin-bottom:7px}
+.opt-chips{display:flex;flex-wrap:wrap;gap:8px}
+.ochip{display:flex;align-items:center;gap:6px;border:1px solid #E0E0E0;border-radius:2px;padding:4px 10px;font-size:11.5px;color:#4A4A4A;cursor:pointer;transition:.15s;background:#fff}
+.ochip:hover{border-color:var(--mint);color:var(--teal-deep)}
+.ochip.cur{border-color:var(--mint);background:var(--mint-soft);color:var(--teal-deep);font-weight:600}
+.ochip .dot{width:15px;height:15px;border-radius:2px;border:1px solid #D6D6D6;flex-shrink:0}
+.qty-row{display:flex;align-items:center;gap:12px;margin-top:16px}
+.qty-row .lb{font-size:12px;color:#6A6A6A}
+.stepper{display:flex;align-items:center;border:1px solid #E0E0E0;border-radius:2px;overflow:hidden}
+.stepper button{width:28px;height:26px;background:#F7F7F7;font-size:14px;color:#666}
+.stepper button:hover{background:var(--mint);color:#fff}
+.stepper input{width:52px;height:26px;border:none;outline:none;text-align:center;font-size:12.5px;font-family:inherit;border-left:1px solid #EEE;border-right:1px solid #EEE}
+.qty-row .moq{font-size:11.5px;color:var(--teal-txt)}
+.dt-buy{display:flex;align-items:center;gap:12px;margin-top:18px}
+.btn-buy{flex:1;padding:13px 0;background:var(--mint);color:#fff;font-size:15px;font-weight:600;border-radius:2px;transition:.15s;letter-spacing:.3px}
+.btn-buy:hover{background:var(--mint-d)}
+.dt-wish{width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#BFBFBF;cursor:pointer;transition:.15s}
+.dt-wish:hover,.dt-wish.on{color:var(--hot)}
+.dt-wish.on svg{fill:var(--hot)}
+.dt-wish svg{width:23px;height:23px}
+.dt-tabs{display:flex;gap:30px;border-bottom:1px solid var(--line);margin-top:34px}
+.dt-tab{padding:11px 0;font-size:13.5px;color:#7A7A7A;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s}
+.dt-tab:hover{color:var(--teal-deep)}
+.dt-tab.cur{color:#1F1F1F;font-weight:600;border-bottom-color:#1F1F1F}
+.dt-pane{padding:22px 0 6px}
+.dt-pane h4{font-size:13.5px;font-weight:600;margin-bottom:9px;color:#2A2A2A}
+.dt-pane p{font-size:12.5px;color:#5A5A5A;margin-bottom:16px;line-height:1.8}
+.dt-pane .pts{font-size:12.5px;color:#5A5A5A;line-height:2}
+.attr-tb{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px;table-layout:fixed}
+.attr-tb td{border:1px solid #ECECEC;padding:9px 10px;color:#5A5A5A;word-break:break-word}
+.attr-tb td.k{background:#FAFAFA;color:#8A8A8A;width:11%}
+.dt-life .scene{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;gap:26px;padding:0 60px 58px}
+.dt-life .scene svg{opacity:.95}
+.dt-life{margin-top:26px;position:relative;border-radius:3px;overflow:hidden;height:400px;display:flex;align-items:center;justify-content:center}
+.dt-life .arw{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:60px;background:rgba(0,0,0,.22);color:#fff;display:flex;align-items:center;justify-content:center;transition:.15s;z-index:3}
+.dt-life .arw:hover{background:rgba(0,0,0,.45)}
+.dt-life .arw.prev{left:0}.dt-life .arw.next{right:0}
+.dt-life .lgo{position:absolute;top:18px;left:50%;transform:translateX(-50%);display:flex;align-items:baseline;gap:5px;z-index:3}
+.dt-life .lgo .en{background:var(--mint);color:#fff;font-weight:700;font-size:13px;padding:2px 9px;letter-spacing:1px}
+.dt-life .lgo .cn{color:#fff;font-weight:700;font-size:15px;text-shadow:0 1px 4px rgba(0,0,0,.3)}
+.dt-life .dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:3}
+.dt-life .dots i{width:7px;height:7px;border-radius:4px;background:rgba(255,255,255,.6);cursor:pointer}
+.dt-life .dots i.cur{background:var(--mint);width:18px}
+.dt-sec-h{font-size:20px;font-weight:500;color:#2E2E2E;margin:34px 0 14px}
+
+/* ══════ 需求标注 ══════ */
+body.anno .anno-chip{display:inline-flex}
+.anno-chip{display:none;align-items:center;gap:5px;background:#FFF8E1;border:1.5px dashed #E2A93B;color:#8A6414;font-size:11.5px;
+  padding:3px 10px;border-radius:12px;cursor:help;position:relative;font-weight:600;vertical-align:middle;text-align:left;line-height:1.5}
+.anno-chip.new-f{background:#E7F8F1;border-color:#2FA37C;color:#186A50}
+.anno-chip .tip{display:none;position:absolute;top:calc(100% + 8px);left:0;width:340px;background:#262A30;color:#E8EAED;font-size:12px;
+  font-weight:400;padding:12px 14px;border-radius:8px;z-index:200;line-height:1.65;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.anno-chip:hover .tip{display:block}
+.anno-chip .tip b{color:#FFD57A}
+.anno-chip .tip .api{display:block;margin-top:6px;padding-top:6px;border-top:1px solid #3A3F46;color:#8FD8CF;font-size:11px;font-family:Consolas,monospace}
+.floor-hd .anno-chip{position:absolute;right:0;top:4px}
+.floor-hd .anno-chip .tip{left:auto;right:0}
+
+/* ══════ 购物车抽屉 ══════ */
+#cartMask{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:700;opacity:0;pointer-events:none;transition:.25s}
+#cartMask.show{opacity:1;pointer-events:auto}
+#cartDrawer{position:fixed;top:0;right:-400px;width:380px;max-width:92vw;height:100vh;background:#fff;z-index:710;
+  transition:right .3s cubic-bezier(.2,.7,.3,1);display:flex;flex-direction:column;box-shadow:-10px 0 40px rgba(0,0,0,.15)}
+#cartDrawer.show{right:0}
+#cartDrawer .hd{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+#cartDrawer .hd b{font-size:15.5px;font-weight:600}
+#cartDrawer .hd span{font-size:12px;color:var(--hint)}
+#cartDrawer .hd .x{margin-left:auto;font-size:18px;color:var(--hint);cursor:pointer}
+#cartDrawer .bd{flex:1;overflow-y:auto;padding:12px 20px}
+.ct-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px dashed #EEE}
+.ct-item .im{width:62px;height:62px;border:1px solid #F0F0F0;border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.ct-item .im svg{width:50px;height:40px}
+.ct-item .inf{flex:1;min-width:0}
+.ct-item .nm{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct-item .mt{font-size:10.5px;color:var(--hint);margin-top:2px}
+.ct-item .pr{color:#1F1F1F;font-weight:600;font-size:13.5px;margin-top:4px}
+.ct-qty{display:flex;align-items:center;margin-top:6px;border:1px solid var(--line);border-radius:3px;width:max-content;overflow:hidden}
+.ct-qty button{width:24px;height:22px;background:#F7F7F7;font-size:12px;color:#666}
+.ct-qty button:hover{background:var(--mint);color:#fff}
+.ct-qty span{width:42px;text-align:center;font-size:12px}
+.ct-item .rm{color:var(--hint);font-size:11.5px;cursor:pointer;align-self:flex-start}
+.ct-item .rm:hover{color:var(--sale)}
+#cartDrawer .ft{border-top:1px solid var(--line);padding:16px 20px}
+#cartDrawer .ft .sum{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+#cartDrawer .ft .sum b{color:#1F1F1F;font-size:20px;font-weight:600}
+#cartDrawer .ft .go{width:100%;padding:12px 0;border-radius:2px;background:var(--mint);color:#fff;font-size:14px;font-weight:600}
+#cartDrawer .ft .go:hover{background:var(--mint-d)}
+.ct-empty{text-align:center;color:var(--hint);padding:60px 0;font-size:13px}
+
+/* ══════ Toast / 需求清单 ══════ */
+#toasts{position:fixed;top:110px;left:50%;transform:translateX(-50%);z-index:800;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:rgba(28,31,36,.92);color:#fff;font-size:13px;padding:10px 22px;border-radius:22px;box-shadow:0 8px 26px rgba(0,0,0,.3);
+  animation:tin .25s;display:flex;align-items:center;gap:8px;max-width:660px}
+.toast .ok{color:#5AD68F}
+@keyframes tin{from{transform:translateY(-14px);opacity:0}to{transform:translateY(0);opacity:1}}
+#reqMask{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:730;display:none;align-items:center;justify-content:center}
+#reqMask.show{display:flex}
+#reqModal{width:900px;max-width:94vw;max-height:84vh;background:#fff;border-radius:8px;display:flex;flex-direction:column;overflow:hidden;animation:qvin .25s}
+@keyframes qvin{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+#reqModal .hd{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+#reqModal .hd b{font-size:15.5px}
+#reqModal .hd span{font-size:11.5px;color:var(--hint)}
+#reqModal .hd .x{margin-left:auto;font-size:20px;color:var(--hint);cursor:pointer}
+#reqModal .bd{overflow-y:auto;padding:6px 24px 22px}
+.req-tb{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:12px}
+.req-tb th{background:var(--mint-soft);text-align:left;padding:9px 12px;font-size:12px;color:#0A6058;white-space:nowrap}
+.req-tb td{padding:10px 12px;border-bottom:1px solid #F2F2F2;vertical-align:top;line-height:1.6}
+.req-tb tr:hover td{background:#FAFEFD}
+.rq-tag{display:inline-block;font-size:11px;padding:2px 9px;border-radius:10px;font-weight:600;white-space:nowrap}
+.rq-tag.n{background:#E7F8F1;color:#186A50}
+.rq-tag.u{background:#FFF4DE;color:#8A6414}
+.rq-tag.k{background:#EDF3FB;color:#1C5FA8}
+.req-tb .api{font-family:Consolas,monospace;font-size:11px;color:#3E8E85;word-break:break-all}
+
+@media (max-width:1200px){
+  .list-grid,.grid5{grid-template-columns:repeat(4,1fr)}
+  .dt-top{grid-template-columns:64px 1fr 380px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ 产品图形库（模拟商品图，白底） ══════ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+
+<symbol id="p-sofa3" viewBox="0 0 200 160"><g><rect x="26" y="62" width="148" height="34" rx="10" fill="var(--c1,#E4DCCF)"/><rect x="34" y="46" width="132" height="30" rx="9" fill="var(--c2,#EFE8DD)"/><rect x="40" y="50" width="38" height="22" rx="7" fill="var(--c1,#E4DCCF)" opacity=".75"/><rect x="82" y="50" width="38" height="22" rx="7" fill="var(--c1,#E4DCCF)" opacity=".75"/><rect x="124" y="50" width="34" height="22" rx="7" fill="var(--c1,#E4DCCF)" opacity=".75"/><rect x="16" y="58" width="18" height="40" rx="8" fill="var(--c2,#EFE8DD)"/><rect x="166" y="58" width="18" height="40" rx="8" fill="var(--c2,#EFE8DD)"/><rect x="26" y="90" width="148" height="14" rx="5" fill="var(--c3,#D8CEBE)"/><rect x="34" y="104" width="6" height="16" rx="2" fill="#4A4A4A"/><rect x="160" y="104" width="6" height="16" rx="2" fill="#4A4A4A"/></g></symbol>
+
+<symbol id="p-sofa2" viewBox="0 0 200 160"><g><rect x="42" y="62" width="116" height="34" rx="10" fill="var(--c1,#E4DCCF)"/><rect x="50" y="46" width="100" height="30" rx="9" fill="var(--c2,#EFE8DD)"/><rect x="56" y="50" width="42" height="22" rx="7" fill="var(--c1,#E4DCCF)" opacity=".75"/><rect x="102" y="50" width="42" height="22" rx="7" fill="var(--c1,#E4DCCF)" opacity=".75"/><rect x="32" y="58" width="18" height="40" rx="8" fill="var(--c2,#EFE8DD)"/><rect x="150" y="58" width="18" height="40" rx="8" fill="var(--c2,#EFE8DD)"/><rect x="42" y="90" width="116" height="14" rx="5" fill="var(--c3,#D8CEBE)"/><rect x="48" y="104" width="6" height="15" rx="2" fill="#4A4A4A"/><rect x="146" y="104" width="6" height="15" rx="2" fill="#4A4A4A"/></g></symbol>
+
+<symbol id="p-chair" viewBox="0 0 200 160"><g><rect x="72" y="28" width="56" height="46" rx="16" fill="var(--c2,#EFE8DD)"/><rect x="66" y="70" width="68" height="18" rx="7" fill="var(--c1,#E4DCCF)"/><rect x="72" y="88" width="5" height="30" rx="2" fill="#5A4A38"/><rect x="123" y="88" width="5" height="30" rx="2" fill="#5A4A38"/><rect x="70" y="112" width="60" height="4" rx="2" fill="#5A4A38" opacity=".7"/></g></symbol>
+
+<symbol id="p-bed" viewBox="0 0 200 160"><g><rect x="30" y="36" width="140" height="34" rx="8" fill="var(--c2,#EFE8DD)"/><rect x="22" y="66" width="156" height="30" rx="6" fill="var(--c1,#E4DCCF)"/><rect x="40" y="56" width="46" height="16" rx="6" fill="#fff" opacity=".85"/><rect x="94" y="56" width="46" height="16" rx="6" fill="#fff" opacity=".85"/><rect x="22" y="92" width="156" height="12" rx="4" fill="var(--c3,#D8CEBE)"/><rect x="30" y="104" width="7" height="14" rx="2" fill="#5A4A38"/><rect x="163" y="104" width="7" height="14" rx="2" fill="#5A4A38"/></g></symbol>
+
+<symbol id="p-dresser" viewBox="0 0 200 160"><g><rect x="56" y="26" width="88" height="98" rx="4" fill="var(--c2,#EFE8DD)"/><rect x="62" y="34" width="76" height="26" rx="3" fill="var(--c1,#E4DCCF)"/><rect x="62" y="64" width="76" height="26" rx="3" fill="var(--c1,#E4DCCF)"/><rect x="62" y="94" width="76" height="22" rx="3" fill="var(--c1,#E4DCCF)"/><rect x="92" y="45" width="16" height="3" rx="1.5" fill="#A08B6E"/><rect x="92" y="75" width="16" height="3" rx="1.5" fill="#A08B6E"/><rect x="92" y="103" width="16" height="3" rx="1.5" fill="#A08B6E"/><rect x="58" y="124" width="6" height="10" rx="2" fill="#5A4A38"/><rect x="136" y="124" width="6" height="10" rx="2" fill="#5A4A38"/></g></symbol>
+
+<symbol id="p-nightstand" viewBox="0 0 200 160"><g><rect x="64" y="52" width="72" height="60" rx="4" fill="var(--c2,#EFE8DD)"/><rect x="70" y="60" width="60" height="22" rx="3" fill="var(--c1,#E4DCCF)"/><rect x="70" y="86" width="60" height="20" rx="3" fill="var(--c1,#E4DCCF)"/><rect x="92" y="69" width="16" height="3" rx="1.5" fill="#A08B6E"/><rect x="92" y="94" width="16" height="3" rx="1.5" fill="#A08B6E"/><rect x="68" y="112" width="6" height="12" rx="2" fill="#5A4A38"/><rect x="126" y="112" width="6" height="12" rx="2" fill="#5A4A38"/></g></symbol>
+
+<symbol id="p-tvstand" viewBox="0 0 200 160"><g><rect x="20" y="62" width="160" height="38" rx="4" fill="var(--c2,#EFE8DD)"/><rect x="27" y="69" width="44" height="24" rx="2" fill="var(--c1,#E4DCCF)"/><rect x="78" y="69" width="44" height="24" rx="2" fill="#F6F4F0"/><rect x="129" y="69" width="44" height="24" rx="2" fill="var(--c1,#E4DCCF)"/><rect x="28" y="100" width="6" height="14" rx="2" fill="#5A4A38"/><rect x="166" y="100" width="6" height="14" rx="2" fill="#5A4A38"/></g></symbol>
+
+<symbol id="p-coffee" viewBox="0 0 200 160"><g><rect x="26" y="58" width="148" height="12" rx="4" fill="var(--c2,#EFE8DD)"/><rect x="34" y="70" width="132" height="22" rx="3" fill="var(--c1,#E4DCCF)"/><rect x="80" y="76" width="40" height="10" rx="2" fill="#fff" opacity=".7"/><rect x="36" y="92" width="6" height="20" rx="2" fill="#5A4A38"/><rect x="158" y="92" width="6" height="20" rx="2" fill="#5A4A38"/></g></symbol>
+
+<symbol id="p-dining" viewBox="0 0 200 160"><g><ellipse cx="100" cy="60" rx="72" ry="11" fill="var(--c2,#EFE8DD)"/><rect x="28" y="60" width="144" height="8" rx="3" fill="var(--c1,#E4DCCF)"/><rect x="46" y="68" width="7" height="46" rx="3" fill="#5A4A38"/><rect x="147" y="68" width="7" height="46" rx="3" fill="#5A4A38"/><rect x="46" y="98" width="108" height="5" rx="2" fill="#5A4A38" opacity=".6"/></g></symbol>
+
+<symbol id="p-desk" viewBox="0 0 200 160"><g><rect x="24" y="56" width="152" height="11" rx="3" fill="var(--c2,#EFE8DD)"/><rect x="34" y="67" width="132" height="18" rx="2" fill="var(--c1,#E4DCCF)"/><rect x="106" y="73" width="18" height="3" rx="1.5" fill="#A08B6E"/><rect x="36" y="85" width="7" height="32" rx="2" fill="#5A4A38"/><rect x="157" y="85" width="7" height="32" rx="2" fill="#5A4A38"/></g></symbol>
+
+<symbol id="p-wardrobe" viewBox="0 0 200 160"><g><rect x="52" y="20" width="96" height="108" rx="3" fill="var(--c2,#EFE8DD)"/><rect x="57" y="25" width="42" height="98" rx="2" fill="var(--c1,#E4DCCF)"/><rect x="101" y="25" width="42" height="98" rx="2" fill="#F6F4F0"/><rect x="94" y="66" width="3" height="18" rx="1.5" fill="#8B7355"/><rect x="103" y="66" width="3" height="18" rx="1.5" fill="#8B7355"/><rect x="55" y="128" width="6" height="9" rx="2" fill="#5A4A38"/><rect x="139" y="128" width="6" height="9" rx="2" fill="#5A4A38"/></g></symbol>
+
+<symbol id="p-bookcase" viewBox="0 0 200 160"><g><rect x="58" y="18" width="84" height="112" rx="3" fill="var(--c2,#EFE8DD)"/><rect x="64" y="24" width="72" height="4" rx="1" fill="var(--c3,#D8CEBE)"/><rect x="64" y="52" width="72" height="4" rx="1" fill="var(--c3,#D8CEBE)"/><rect x="64" y="80" width="72" height="4" rx="1" fill="var(--c3,#D8CEBE)"/><rect x="64" y="108" width="72" height="4" rx="1" fill="var(--c3,#D8CEBE)"/><rect x="68" y="32" width="6" height="20" rx="1" fill="#B9A88F"/><rect x="76" y="34" width="5" height="18" rx="1" fill="#CBBBA0"/><rect x="84" y="30" width="6" height="22" rx="1" fill="#A99madeup"/><rect x="84" y="30" width="6" height="22" rx="1" fill="#AD9C82"/><rect x="68" y="60" width="5" height="20" rx="1" fill="#CBBBA0"/><rect x="75" y="62" width="6" height="18" rx="1" fill="#B9A88F"/></g></symbol>
+
+<symbol id="p-lamp" viewBox="0 0 200 160"><g><path d="M74 30h52l14 32H60z" fill="var(--c2,#EFE8DD)"/><rect x="96" y="62" width="7" height="48" rx="3" fill="#8B7355"/><ellipse cx="100" cy="114" rx="26" ry="6" fill="var(--c1,#E4DCCF)"/></g></symbol>
+
+<symbol id="p-mirror" viewBox="0 0 200 160"><g><rect x="70" y="20" width="60" height="98" rx="30" fill="var(--c2,#EFE8DD)"/><rect x="77" y="27" width="46" height="84" rx="23" fill="#F4F7F8"/><rect x="86" y="118" width="28" height="6" rx="3" fill="#5A4A38"/></g></symbol>
+
+<symbol id="p-vanity" viewBox="0 0 200 160"><g><circle cx="100" cy="42" r="20" fill="#F1F5F6" stroke="var(--c3,#D8CEBE)" stroke-width="3"/><rect x="97" y="62" width="6" height="10" fill="var(--c3,#D8CEBE)"/><rect x="40" y="72" width="120" height="10" rx="3" fill="var(--c2,#EFE8DD)"/><rect x="48" y="82" width="104" height="18" rx="2" fill="var(--c1,#E4DCCF)"/><rect x="92" y="88" width="16" height="3" rx="1.5" fill="#A08B6E"/><rect x="50" y="100" width="6" height="20" rx="2" fill="#4A4A4A"/><rect x="144" y="100" width="6" height="20" rx="2" fill="#4A4A4A"/></g></symbol>
+
+<symbol id="p-mattress" viewBox="0 0 200 160"><g><rect x="26" y="56" width="148" height="34" rx="8" fill="var(--c2,#EFE8DD)"/><path d="M26 66h148M26 76h148" stroke="var(--c3,#D8CEBE)" stroke-width="2"/><rect x="26" y="90" width="148" height="10" rx="4" fill="var(--c1,#E4DCCF)"/></g></symbol>
+
+<symbol id="p-shelf" viewBox="0 0 200 160"><g><rect x="46" y="40" width="52" height="6" rx="2" fill="var(--c2,#EFE8DD)"/><rect x="106" y="62" width="52" height="6" rx="2" fill="var(--c2,#EFE8DD)"/><rect x="46" y="86" width="52" height="6" rx="2" fill="var(--c2,#EFE8DD)"/><rect x="106" y="108" width="52" height="6" rx="2" fill="var(--c2,#EFE8DD)"/><rect x="60" y="28" width="8" height="12" rx="1" fill="var(--c1,#E4DCCF)"/><rect x="120" y="50" width="8" height="12" rx="1" fill="var(--c1,#E4DCCF)"/></g></symbol>
+
+<symbol id="p-stool" viewBox="0 0 200 160"><g><ellipse cx="100" cy="62" rx="34" ry="14" fill="var(--c2,#EFE8DD)"/><rect x="66" y="62" width="68" height="16" rx="6" fill="var(--c1,#E4DCCF)"/><rect x="74" y="78" width="6" height="32" rx="2" fill="#5A4A38"/><rect x="120" y="78" width="6" height="32" rx="2" fill="#5A4A38"/></g></symbol>
+
+<symbol id="p-kidbed" viewBox="0 0 200 160"><g><rect x="34" y="46" width="132" height="12" rx="4" fill="var(--c2,#EFE8DD)"/><rect x="34" y="76" width="132" height="26" rx="5" fill="var(--c1,#E4DCCF)"/><rect x="34" y="46" width="9" height="66" rx="3" fill="var(--c3,#D8CEBE)"/><rect x="157" y="46" width="9" height="66" rx="3" fill="var(--c3,#D8CEBE)"/><path d="M60 46v30M84 46v30M108 46v30M132 46v30" stroke="var(--c3,#D8CEBE)" stroke-width="5" stroke-linecap="round"/></g></symbol>
+
+<!-- UI 图标 -->
+<symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></g></symbol>
+<symbol id="i-cart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 3h2l2.6 12.4a1.6 1.6 0 0 0 1.6 1.3h8.8a1.6 1.6 0 0 0 1.6-1.2L21.5 7H6"/><circle cx="9.5" cy="20.5" r="1.5"/><circle cx="17.5" cy="20.5" r="1.5"/></g></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 20.4S3.6 15.5 3.6 9.6C3.6 6.8 5.8 4.6 8.6 4.6c1.5 0 2.7.7 3.4 1.7.7-1 2-1.7 3.4-1.7 2.8 0 5 2.2 5 5 0 5.9-8.4 10.8-8.4 10.8z"/></symbol>
+<symbol id="i-arr-l" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M14.5 5.5 8 12l6.5 6.5"/></symbol>
+<symbol id="i-arr-r" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M9.5 5.5 16 12l-6.5 6.5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-horn" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4h3l6 5V5l-6 5H3z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></g></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M5.5 14.5 12 8l6.5 6.5"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.5 4 5.6 4 9s-1.4 6.5-4 9c-2.6-2.5-4-5.6-4-9s1.4-6.5 4-9z"/></g></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></g></symbol>
+</defs></svg>
+
+<!-- ══════ Demo 工具条 ══════ -->
+<div id="demoBar">
+  <div class="wrap">
+    <span class="dot"></span>
+    <span><b>BPS 商城端优化交互 Demo</b>&nbsp;v3.0 · 按 linsydirect.com 真实页面复刻 · 首页 / 列表页 / 详情页</span>
+    <span class="spacer"></span>
+    <label class="switch" id="swAnno"><span class="tk"></span>需求标注模式</label>
+    <button class="btn-plain" id="btnReq">📋 优化需求清单对照</button>
+  </div>
+</div>
+
+<!-- ══════ 顶部服务条 ══════ -->
+<div id="utilBar">
+  <div class="wrap">
+    <span>Hi. Linsvtest</span><a style="margin-left:10px">⇥ Log out</a>
+    <span class="r">
+      <span>Service call：0757-81299039</span>
+      <span>Service email：franchise@linsy.…</span>
+      <a>English ⌄</a><a>USD ⌄</a><a>📖 User Guide</a>
+    </span>
+  </div>
+</div>
+
+<!-- ══════ 页头导航 ══════ -->
+<header class="site">
+  <div class="wrap nav-row">
+    <a class="logo" data-nav="home"><span class="en">LINSY</span><span class="cn">林氏</span></a>
+    <nav class="main">
+      <a class="active" data-nav="home">Home</a>
+      <a data-nav="list">Products</a>
+      <a data-nav="wish">Wishlist</a>
+      <a data-nav="po">PO<span class="badge-n hidden" id="cartBadge">0</span></a>
+      <a data-nav="account">Account</a>
+    </nav>
+    <div class="searchbox">
+      <div class="inp">
+        <input id="searchInput" type="text" placeholder="Search more" autocomplete="off">
+        <button class="go" id="searchBtn"><svg width="16" height="16"><use href="#i-search"/></svg></button>
+      </div>
+      <div class="sug" id="searchSug">
+        <div class="h">HOT SEARCHES</div>
+        <span class="kw">Sofa</span><span class="kw">Dresser</span><span class="kw">TV stand</span><span class="kw">Coffee table</span><span class="kw">Bed</span><span class="kw">Study desk</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════ ① 通知栏（新增） ══════ -->
+<div id="noticeBar">
+  <div class="wrap">
+    <span class="ic"><svg width="14" height="14"><use href="#i-horn"/></svg>NOTICE</span>
+    <div class="notice-viewport"><div class="notice-track" id="noticeTrack"></div></div>
+    <span class="anno-chip new-f">①新增<span class="tip"><b>通知栏（新增楼层）</b><br>位于导航栏下方、轮播海报上方，滚动文字通知形式；运营端增设维护入口，可按需隐藏或展示整栏及单条公告。<br><b>建议实现：复用运营端「内容配置」楼层框架，在 conttitleType 新增「通知栏」类型</b>（不直接改造轮播小海报，也不复用已被企业公告占用的 cms_notice）。文案→contlistName、标签→contlist_conf、落地页→contlistUrl、排序→contlistOrder、单条启停→updateContlistState、整栏显隐→updateConttitleState、定时上线→contlistReleasetime。<span class="api">cms_conttitle + cms_contlist + cms_contlist_conf · /web/cms/conttitleBusiness · saveContlist / updateContlistState / queryContlistPage</span></span></span>
+    <button id="noticeClose" title="Dismiss">✕</button>
+  </div>
+</div>
+
+<!-- ══════════════ 首页 ══════════════ -->
+<div id="viewHome">
+
+  <!-- ② 轮播海报 -->
+  <section class="floor" id="bannerFloor" data-floor="banner" style="margin-top:0">
+    <div class="banner" id="banner">
+      <button class="b-arrow prev" data-bmove="-1"><svg width="19" height="19"><use href="#i-arr-l"/></svg></button>
+      <button class="b-arrow next" data-bmove="1"><svg width="19" height="19"><use href="#i-arr-r"/></svg></button>
+      <div class="b-dots" id="bDots"></div>
+    </div>
+    <div class="wrap" style="margin-top:8px;text-align:center"><span class="anno-chip">②保留<span class="tip"><b>轮播海报（保留原位置）</b><br>作为 GTM、展会活动或其他宣传内容的展示区，支持自动轮播 / 手动切换 / 指示器定位。视觉与现网 CIFF 邀请函海报一致。<span class="api">CMS 广告位：/web/cms/advertise · 素材与跳转链接运营端可配</span></span></span></div>
+  </section>
+
+  <!-- ③ 分类导览 -->
+  <section class="floor wrap" id="catNav" data-floor="catnav">
+    <div class="catbar" id="catbar">
+      <div class="cat-space" id="catSpaceRow" style="display:flex"></div>
+      <div class="cat-divider"></div>
+      <div class="zone-nav" id="catRegionRow"></div>
+      <div class="megamenu" id="megamenu"></div>
+    </div>
+    <div style="margin-top:10px;text-align:center"><span class="anno-chip">③调整<span class="tip"><b>分类导览（两个分类维度）</b><br>维度一：<b>空间分类</b>（第一行圆形入口，保留现网样式），新增悬停自动展开细分类目窗格，点击跳转对应空间列表页；<br>维度二：<b>大区专区</b>（第二行，新增），东南亚 / 澳新 / 拉美三个专区入口，点击进入对应大区商品列表页。<span class="api">/web/rs/classtree（空间）+ /web/rs/pntree（品类）；大区依赖商品新增 regionTag 打标</span></span></span></div>
+  </section>
+
+  <!-- ④ 品类推荐-1 -->
+  <section class="floor wrap" id="floorCat" data-floor="cat">
+    <div class="floor-hd">
+      <h2>Featured Categories</h2>
+      <div class="sub">FLOOR 1 · 品类推荐 — 大图 + 小图组合展示 6 大核心品类，悬停小图大图联动</div>
+      <a class="more" data-go-list='{"src":"Featured Categories"}'>more <svg width="12" height="12"><use href="#i-arr-r"/></svg></a>
+      <span class="anno-chip">④调整<span class="tip"><b>品类推荐（楼层1）</b><br>沿用现网左大图 + 右小图版式，标题改为「品类推荐 Featured Categories」，去掉标题下方的空间分类 Tab；内容为需求指定的 6 个核心品类：沙发类 / 床类 / 桌类 / 椅类 / 柜类 / 小件类；点击右侧品类图标与左侧大图，均跳转对应品类的商品列表页，点击 more 进入全部商品。<span class="api">/web/rs/pntree · queryPntreeTree；楼层顺序由 CMS tginfoMenu 配置</span></span></span>
+    </div>
+    <div class="cat-rec">
+      <div class="cr-hero" id="crHero"></div>
+      <div class="cr-cells" id="crCells"></div>
+    </div>
+  </section>
+
+  <!-- ⑤ 系列推荐-2 -->
+  <section class="floor wrap" id="floorSeries" data-floor="series">
+    <div class="floor-hd">
+      <h2>Where Style Meets Function</h2>
+      <div class="sub">FLOOR 2 · 系列推荐（原「灵感系列」更名）— 悬停展开系列面板，点击 MORE 进入系列列表页</div>
+      <span class="anno-chip">⑤更名<span class="tip"><b>系列推荐（楼层2）</b><br>「灵感系列」更名为系列推荐。保留现网风格系列手风琴视觉，横向展示系列图片，点击图片 / MORE 跳转对应系列的商品列表页。<span class="api">系列 = 商品打标（goodsProperty / rtag），ES 列表页按系列字段过滤</span></span></span>
+    </div>
+    <div class="series-acc" id="seriesTrack"></div>
+  </section>
+
+  <!-- ⑥ 爆款推荐-3 -->
+  <section class="floor wrap" id="floorHot" data-floor="hot">
+    <div class="floor-hd">
+      <h2>Best Sellers</h2>
+      <div class="sub">FLOOR 3 · 爆款推荐 — 按累计半年销量排序，运营端支持手动调整；改为横滑展示</div>
+      <a class="more" data-go-list='{"flag":"hot","src":"Best Sellers"}'>more <svg width="12" height="12"><use href="#i-arr-r"/></svg></a>
+      <span class="anno-chip">⑥调整<span class="tip"><b>爆款推荐（楼层3）</b><br>现网为 5 列换行网格，<b>改为横向展示 5 款 + 箭头滑动查看</b>，more 跳转爆款商品列表页。排序采用「累计半年销量」逻辑，运营端支持手动置顶 / 调序；全楼层增设埋点监测点击率与转化率。<span class="api">大数据 statisticRecommender/statistic 销量策略 → ES salesVolume6m 排序字段</span></span></span>
+    </div>
+    <div class="hscroll">
+      <button class="hs-arrow prev"><svg width="17" height="17"><use href="#i-arr-l"/></svg></button>
+      <div class="hs-track" id="hotTrack"></div>
+      <button class="hs-arrow next"><svg width="17" height="17"><use href="#i-arr-r"/></svg></button>
+    </div>
+  </section>
+
+  <!-- ⑦ 新品推荐-4 -->
+  <section class="floor wrap" id="floorNew" data-floor="new">
+    <div class="floor-hd">
+      <h2>New Arrivals</h2>
+      <div class="sub">FLOOR 4 · 新品推荐 — 按上新时间排序，横滑查看，抢先锁定首单资源</div>
+      <a class="more" data-go-list='{"flag":"new","src":"New Arrivals"}'>more <svg width="12" height="12"><use href="#i-arr-r"/></svg></a>
+      <span class="anno-chip">⑦调整<span class="tip"><b>新品推荐（楼层4）</b><br>横向展示 5 款，点击箭头滑动查看，点击 more 跳转新品推荐商品列表页。<span class="api">ES sortField=skuHdate（上新时间）· find.json</span></span></span>
+    </div>
+    <div class="hscroll">
+      <button class="hs-arrow prev"><svg width="17" height="17"><use href="#i-arr-l"/></svg></button>
+      <div class="hs-track" id="newTrack"></div>
+      <button class="hs-arrow next"><svg width="17" height="17"><use href="#i-arr-r"/></svg></button>
+    </div>
+  </section>
+
+  <!-- ⑧ 大区-5（新增） -->
+  <section class="floor wrap" id="floorRegion" data-floor="region">
+    <div class="floor-hd">
+      <h2>Global Marketplace</h2>
+      <div class="sub">FLOOR 5 · 大区专区（新增）— 按市场划分商品专区，3×2 分布，区域打标字段驱动</div>
+      <a class="more" id="regionMore">more <svg width="12" height="12"><use href="#i-arr-r"/></svg></a>
+      <span class="anno-chip new-f">⑧新增<span class="tip"><b>大区专区（楼层5，新增）</b><br>新增商品「区域打标字段」，按市场划分商品专区（东南亚 / 澳新 / 拉美）；专区内以 3×2 分布产品图片，点击产品图片进入商品详情，点击<b>标题下方的 more</b> 跳转当前大区的商品列表页查看更多区域商品（二跳页携带区域标）。<span class="api">商品域新增 regionTag（可挂 rtag / goodsProperty），ES 同步后支持专区过滤</span></span></span>
+    </div>
+    <div class="region-tabs" id="regionTabs"></div>
+    <div class="region-note" id="regionNote"></div>
+    <div class="grid3" id="regionGrid"></div>
+  </section>
+
+  <!-- ⑨ 定制产品-6（新增） -->
+  <section class="floor wrap" id="floorCustom" data-floor="custom">
+    <div class="floor-hd">
+      <h2>Co-Creation · <em>Group Orders</em></h2>
+      <div class="sub">FLOOR 6 · 定制产品（新增）— 按客户加购意向智能选品，每款显示拼单进度，拼满起订量即开产</div>
+      <a class="more" data-go-list='{"flag":"custom","src":"Group Orders"}'>more <svg width="12" height="12"><use href="#i-arr-r"/></svg></a>
+      <span class="anno-chip new-f">⑨新增<span class="tip"><b>定制产品（楼层6，新增）</b><br>横向展示 5 款，每款产品下方显示拼单进度；选品逻辑抓取客户「加购意向清单」等行为数据；楼层支持悬浮显示（右下角悬浮窗常驻）或始终在页面可见区域。<span class="api">选品：大数据 recSimInterestCart（加购兴趣）+ ocshopping 购物车；拼单复用 promotion 拼团能力</span></span></span>
+    </div>
+    <div class="hscroll">
+      <button class="hs-arrow prev"><svg width="17" height="17"><use href="#i-arr-l"/></svg></button>
+      <div class="hs-track" id="customTrack"></div>
+      <button class="hs-arrow next"><svg width="17" height="17"><use href="#i-arr-r"/></svg></button>
+    </div>
+  </section>
+
+  <!-- ⑩ 特价产品-7（新增） -->
+  <section class="floor wrap" id="floorSale" data-floor="sale">
+    <div class="floor-hd">
+      <h2>Clearance <em>Deals</em></h2>
+      <div class="sub">FLOOR 7 · 特价产品 / 滞销品（新增）— 运营端手动划定特惠产品池，售完即止</div>
+      <a class="more" data-go-list='{"flag":"sale","src":"Clearance"}'>more <svg width="12" height="12"><use href="#i-arr-r"/></svg></a>
+      <span class="anno-chip new-f">⑩新增<span class="tip"><b>特价产品 / 滞销品（楼层7，新增）</b><br>运营端新增维护入口，通过手动选择划定特价产品池；前台展示原价 / 特价对比与 SALE 角标。<span class="api">运营端选品池 → CMS 栏目内容（tginfoMenu + contlist）或商品 saleFlag 打标</span></span></span>
+    </div>
+    <div class="sale-strip">
+      <div class="hscroll">
+        <button class="hs-arrow prev"><svg width="17" height="17"><use href="#i-arr-l"/></svg></button>
+        <div class="hs-track" id="saleTrack"></div>
+        <button class="hs-arrow next"><svg width="17" height="17"><use href="#i-arr-r"/></svg></button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══════════════ 商品列表页（1:1 复刻 + 优化） ══════════════ -->
+<div id="viewList" class="hidden">
+  <div class="wrap">
+    <div class="crumb"><a data-nav="home">Home</a><span>›</span><b id="crumbCur">Products</b><span id="crumbSrc"></span></div>
+    <div class="allcat-h">All Categories</div>
+    <div class="catchips" id="catChips"></div>
+
+    <div class="opt-block">
+      <span class="opt-flag">⑪ 优化新增</span>
+      <div class="lc-row" id="listCatTabs"></div>
+      <div id="filterPanel" class="fpanel hidden"><div id="filterbar"></div></div>
+      <div class="sortbar" id="sortbar"></div>
+      <div class="active-chips" id="activeChips"></div>
+      <div style="padding:0 0 10px"><span class="anno-chip">⑪调整<span class="tip"><b>商品列表页（二跳页）优化</b><br>1) 列表页上方设置<b>品类分类导览</b>，点击分类即展开对应产品（带在售数量）；2) 新增<b>筛选栏</b>（Space / Series / Region Zone / Price），<b>默认收起</b>，点右侧「筛选」按钮展开，避免占用首屏商品位；3) 从首页带入的筛选条件以「已选」标签常驻显示，收起状态下也能看到并单独清除；4) 排序新增累计半年销量；5) 商品卡展示区域打标。原有 All Categories 胶囊行、5 列网格、分页器保持不变。<span class="api">ES find.json：classtreeCode / 系列 / regionTag 过滤 + sortField=salesVolume6m 排序</span></span></span></div>
+    </div>
+
+    <div class="list-grid" id="listGrid"></div>
+    <div class="empty hidden" id="listEmpty"><svg><use href="#p-shelf"/></svg><div>No products match the current filters.</div></div>
+    <div class="pager" id="pager"></div>
+  </div>
+</div>
+
+<!-- ══════════════ 商品详情页（1:1 复刻） ══════════════ -->
+<div id="viewDetail" class="hidden">
+  <div class="wrap">
+    <div class="crumb"><a data-nav="home">Home</a><span>›</span><a data-nav="list">Products</a><span>›</span><b id="dtCrumb">Detail</b></div>
+    <div class="dt-top">
+      <div class="dt-thumbs" id="dtThumbs"></div>
+      <div class="dt-main" id="dtMain">
+        <button class="arw prev" id="dtPrev"><svg width="16" height="16"><use href="#i-arr-l"/></svg></button>
+        <button class="arw next" id="dtNext"><svg width="16" height="16"><use href="#i-arr-r"/></svg></button>
+      </div>
+      <div class="dt-info" id="dtInfo"></div>
+    </div>
+
+    <div class="dt-tabs" id="dtTabs"></div>
+    <div class="dt-pane" id="dtPane"></div>
+
+    <div class="dt-life" id="dtLife">
+      <div class="lgo"><span class="en">LINSY</span><span class="cn">林氏家居</span></div>
+      <button class="arw prev" data-life="-1"><svg width="17" height="17"><use href="#i-arr-l"/></svg></button>
+      <button class="arw next" data-life="1"><svg width="17" height="17"><use href="#i-arr-r"/></svg></button>
+      <div class="dots" id="lifeDots"></div>
+    </div>
+
+    <div class="dt-sec-h">Same Series</div>
+    <div class="grid5" id="recSeries"></div>
+    <div class="dt-sec-h">Same Category</div>
+    <div class="grid5" id="recCat"></div>
+    <div class="dt-sec-h">Same Style</div>
+    <div class="grid5" id="recStyle"></div>
+  </div>
+</div>
+
+<!-- 悬浮件 -->
+<div id="gbFloat" class="hide">
+  <div class="hd">🛠 Group Orders<span class="x" id="gbFloatClose">✕</span></div>
+  <div class="bd" id="gbFloatBody"></div>
+</div>
+<button id="backTop" title="Back to top"><svg width="19" height="19"><use href="#i-up"/></svg></button>
+
+<!-- 购物车抽屉 -->
+<div id="cartMask"></div>
+<div id="cartDrawer">
+  <div class="hd"><b>Shopping List</b><span id="cartCntTxt">0 items</span><span class="x" id="cartClose">✕</span></div>
+  <div class="bd" id="cartBody"></div>
+  <div class="ft">
+    <div class="sum"><span style="font-size:12.5px;color:var(--sub)">Total (FOB Ref.)</span><b id="cartSum">$0</b></div>
+    <button class="go" id="cartGo">Submit PO</button>
+  </div>
+</div>
+
+<!-- 需求清单弹窗 -->
+<div id="reqMask"><div id="reqModal">
+  <div class="hd"><b>📋 商城端首页优化 · 需求清单 ⇄ Demo 实现对照</b><span>来源：《商城端需求.xlsx》· 需求2 + 商城规划首页</span><span class="x" id="reqClose">✕</span></div>
+  <div class="bd" id="reqBody"></div>
+</div></div>
+
+<!-- 页尾 -->
+<footer class="site">
+  <div class="wrap">
+    <div class="cols">
+      <div class="brand-blk">
+        <div class="lg"><span class="en">LINSY</span><span class="cn">林氏</span></div>
+        <div class="ct">Contact Us</div>
+        <div class="tel">0757-81299039</div>
+        <div class="soc"><i>f</i><i>in</i><i>▶</i><i>◎</i><i>𝕏</i></div>
+      </div>
+      <div><h5>About LINSY</h5><ul><li>Our Story</li><li>Why Choose Us</li><li>News</li><li>Contact Us</li></ul></div>
+      <div><h5>Franchisee</h5><ul><li>Apply for Franchise</li><li>Global Showrooms</li><li>Our Advantages</li></ul></div>
+      <div><h5>LINSY Help</h5><ul><li>After-Sales Service</li><li>Packaging Info</li><li>DELIVERY &amp; SHIPMENT</li><li>VR Showroom</li><li>FAQS</li></ul></div>
+      <div><h5>Legal</h5><ul><li>Terms &amp; Conditions</li><li>Offers &amp; Details</li><li>Terms of use</li><li>Privacy Policy</li><li>SMS Program Terms</li><li>Dispute Resolution Process</li><li>Product Recalls</li><li>Interest Based Ads</li><li>Do not sell or share my personal information</li></ul></div>
+    </div>
+    <div class="copy"><span>© 2026 LINSY BPS Mall. All rights reserved.</span><span>本页面为商城端优化交互 Demo，商品数据为演示样例</span></div>
+  </div>
+</footer>
+
+<div id="toasts"></div>
+
+<script>
+/* ═══════════ 配色 / 分类基础数据 ═══════════ */
+const PAL = {
+  beige:['#E6DFD2','#F2ECE2','#D9D0BE'], grey:['#D6D8D9','#E8EAEB','#C5C8CA'],
+  walnut:['#7E5A3E','#966F4F','#6B4B33'], oak:['#D9B989','#E8CFA6','#C4A272'],
+  white:['#EDEDED','#FAFAFA','#E0E0E0'], green:['#BDCBB2','#D3DCCB','#A8B99C'],
+  terra:['#C97744','#DC8A55','#AE6335'], black:['#4A4A4A','#5E5E5E','#3A3A3A'],
+  cream:['#E8E2D6','#F5F1E9','#DAD2C2']
+};
+const SWHEX = {beige:'#E6DFD2',grey:'#D0D3D4',walnut:'#7E5A3E',oak:'#D9B989',white:'#F0F0F0',green:'#BDCBB2',terra:'#C97744',black:'#4A4A4A',cream:'#E8E2D6'};
+const CATS = [
+  {name:'Sofas',    cn:'沙发类', en:'SOFA COLLECTION',    icon:'p-sofa3',    pal:'beige', desc:'Fabric · Leather · Modular · Recliner'},
+  {name:'Beds',     cn:'床类',   en:'BED COLLECTION',     icon:'p-bed',      pal:'cream', desc:'Solid Wood · Upholstered · Storage · Mattress'},
+  {name:'Tables',   cn:'桌类',   en:'TABLE COLLECTION',   icon:'p-dining',   pal:'oak',   desc:'Dining · Coffee · Desk · Sintered Stone'},
+  {name:'Chairs',   cn:'椅类',   en:'CHAIR COLLECTION',   icon:'p-chair',    pal:'green', desc:'Dining · Lounge · Study · Stool'},
+  {name:'Cabinets', cn:'柜类',   en:'CABINET COLLECTION', icon:'p-wardrobe', pal:'walnut',desc:'TV Stand · Wardrobe · Sideboard · Bookcase'},
+  {name:'Accents',  cn:'小件类', en:'ACCENT COLLECTION',  icon:'p-lamp',     pal:'cream', desc:'Lamps · Mirrors · Shelves · Decor'}
+];
+const SPACES = [
+  {name:'Linsy Living',        short:'Linsy Living', subs:[['Modular Sofas','Sofas','p-sofa3'],['Sofa Beds','Sofas','p-sofa2'],['Sintered Stone','Tables','p-dining'],['Smart Storage','Cabinets','p-wardrobe'],['Lighting','Accents','p-lamp'],['Decor','Accents','p-shelf']]},
+  {name:'Living Room',         short:'Living Room',  subs:[['Sofas','Sofas','p-sofa3'],['Coffee Tables','Tables','p-coffee'],['TV Stands','Cabinets','p-tvstand'],['Accent Chairs','Chairs','p-chair'],['Floor Lamps','Accents','p-lamp'],['End & Side Tables','Accents','p-coffee']]},
+  {name:'Dining Room',         short:'Dining Room',  subs:[['Dining Tables','Tables','p-dining'],['Dining Chairs','Chairs','p-chair'],['Sideboards','Cabinets','p-tvstand'],['Bar Stools','Chairs','p-stool'],['Wine Cabinets','Cabinets','p-bookcase'],['Tableware','Accents','p-shelf']]},
+  {name:'Bedroom',             short:'Bedroom',      subs:[['Beds','Beds','p-bed'],['Mattresses','Beds','p-mattress'],['Wardrobes','Cabinets','p-wardrobe'],['Nightstands','Cabinets','p-nightstand'],['Dressers','Cabinets','p-dresser'],['Mirrors','Accents','p-mirror']]},
+  {name:'Home office',         short:'Home office',  subs:[['Study Desks','Tables','p-desk'],['Office Chairs','Chairs','p-chair'],['Bookcases','Cabinets','p-bookcase'],['Filing Cabinets','Cabinets','p-nightstand'],['Desk Lamps','Accents','p-lamp'],['Wall Shelves','Accents','p-shelf']]},
+  {name:'Linsy Kids Furniture',short:'Kids Furniture',subs:[['Kids Beds','Beds','p-kidbed'],['Study Desks','Tables','p-desk'],['Study Chairs','Chairs','p-chair'],['Toy Storage','Cabinets','p-nightstand'],['Night Lamps','Accents','p-lamp'],['Bunk Beds','Beds','p-kidbed']]},
+  {name:'New Arrivals',        short:'New Arrivals', subs:[['New Sofas','Sofas','p-sofa2'],['New Beds','Beds','p-bed'],['New Tables','Tables','p-dining'],['New Chairs','Chairs','p-chair'],['New Cabinets','Cabinets','p-wardrobe'],['New Accents','Accents','p-lamp']]}
+];
+const REGIONS = [
+  {short:'SEA',  name:'Southeast Asia', flag:'🌴', note:'Southeast Asia Zone · tropical-ready picks, sorted by 6-month sales'},
+  {short:'ANZ',  name:'AU & NZ',        flag:'🐨', note:'AU & NZ Zone · solid-wood preference, large formats'},
+  {short:'LATAM',name:'Latin America',  flag:'🌵', note:'Latin America Zone · high-value volume movers'}
+];
+const SERIES = [
+  {name:'PK Series',        tag:'The Beauty of Less, The Warmth of Home.', pal:'cream', icon:'p-bed'},
+  {name:'Whispering Wood',  tag:"Nature's Texture, Quiet Strength.",       pal:'oak',   icon:'p-chair'},
+  {name:'Curated Comfort',  tag:'Stay Cozy, Every Single Day.',            pal:'beige', icon:'p-sofa3'},
+  {name:'Gentle Haven',     tag:'Soft Light, Slow Living.',                pal:'white', icon:'p-lamp'},
+  {name:'Cozy Retreat',     tag:'Warmth in Every Corner.',                 pal:'terra', icon:'p-sofa2'},
+  {name:'Timeless Comfort', tag:'Modern Elegance, Made to Last.',          pal:'grey',  icon:'p-wardrobe'}
+];
+
+/* ═══════════ 商品数据（名称/价格/交期/Item 取自现网真实页面） ═══════════ */
+/* [name, price, delivery, moq, item, icon, cat, space, series, regions, flags, sales6m, hdate, swatches, oldPrice] */
+const RAW = [
+ ['Otago 2M TV stand cabinet',57.23,'7Days',1,'LS02ZHOI2M001','p-tvstand','Cabinets','Living Room','PK Series','SEA,LATAM','',6400,'2026-03-12','cream'],
+ ['Patagonia Solid wood 1.5M Platform Bed',109.83,'60Days',1,'LS02ZHPK3A001','p-bed','Beds','Bedroom','Whispering Wood','ANZ,SEA','',5200,'2026-05-06','oak'],
+ ['Basel 2.18m Beige Leather Sofa',307.08,'55Days',1,'LSC25SF093779','p-sofa3','Sofas','Living Room','Timeless Comfort','SEA,ANZ,LATAM','hot',12800,'2026-01-22','beige,grey,walnut'],
+ ['Pecos Dressing table/table',184.25,'30Days',1,'LSC23ZT006253','p-vanity','Cabinets','Bedroom','Cozy Retreat','SEA','',4100,'2026-04-18','walnut'],
+ ['Solid wood study desk',131.65,'7Days',1,'LSC22SZ002601','p-desk','Tables','Home office','Whispering Wood','ANZ,LATAM','',5800,'2026-02-14','oak'],
+ ['Peace 0.8M book cabinet Bookcase',263.73,'7Days',1,'LSC22SG002607','p-bookcase','Cabinets','Home office','Gentle Haven','SEA','',2600,'2026-03-30','walnut'],
+ ['Jordan 1.6m Sliding-Door Wardrobe',224.86,'15Days',1,'LSC25YG065471','p-wardrobe','Cabinets','Bedroom','PK Series','ANZ','',5100,'2026-06-02','white'],
+ ['Ontario 4 Drawer Dresser',48.41,'7Days',1,'LSC22DD001143','p-dresser','Cabinets','Bedroom','PK Series','SEA,LATAM','hot',9400,'2025-12-08','cream'],
+ ['Prague 0.65m Wood Color Dressing Table',150.58,'7Days',1,'LSC24ZT026653','p-vanity','Cabinets','Bedroom','Whispering Wood','ANZ','',3700,'2026-05-20','oak'],
+ ['Offaly bedside 2 drawer nightstand',30.78,'15Days',1,'LSC22CG001310','p-nightstand','Cabinets','Bedroom','PK Series','SEA,ANZ','',8200,'2026-01-15','cream'],
+ ['Paterson bedside 2 drawer nightstand',66.47,'7Days',1,'LSC22CG000637','p-nightstand','Cabinets','Bedroom','Whispering Wood','SEA,LATAM','',6100,'2026-02-28','oak,walnut,black'],
+ ['Princeton 1.15M coffee table',137.28,'7Days',1,'LS02ZHPK2L002','p-coffee','Tables','Living Room','Whispering Wood','ANZ','',4900,'2026-04-05','oak'],
+ ['Alps 1.8 meter TV stand cabinet',54.91,'20Days',1,'LSC22DG005664','p-tvstand','Cabinets','Living Room','PK Series','SEA,LATAM','hot',10200,'2026-03-08','oak'],
+ ['Aldan 1.2 meter coffee table',59.83,'7Days',1,'LSC22CJ005665','p-coffee','Tables','Living Room','PK Series','SEA','',7300,'2026-05-11','oak'],
+ ['Boston 1.97m Grey Fabric Sofa',159.54,'55Days',1,'LS01SFS101055','p-sofa2','Sofas','Living Room','Timeless Comfort','ANZ,LATAM','',5600,'2026-06-15','grey'],
+ ['Coco 3 Drawer Dresser',46.97,'7Days',1,'LSC23DD008571','p-dresser','Cabinets','Bedroom','Curated Comfort','SEA','',4400,'2026-04-22','cream'],
+ ['Bratislava 1.23m Green Fabric Sofa',91.33,'55Days',1,'LSC26SF115835','p-sofa2','Sofas','Living Room','Cozy Retreat','LATAM','new',3100,'2026-07-08','green'],
+ ['Barcelona 1.22m White Fabric Sofa',93.93,'55Days',1,'LSC26SF115838','p-sofa2','Sofas','Living Room','Gentle Haven','ANZ,LATAM','new',3600,'2026-07-10','white,beige'],
+ ['Budapest 2.18m Brown Fabric Sofa',194.65,'45Days',1,'LSC25SF047259','p-sofa3','Sofas','Living Room','Cozy Retreat','SEA,LATAM','',6700,'2026-02-05','terra,grey,cream'],
+ ['Colorado dresser chair',42.92,'7Days',1,'LSC22DZ005240','p-stool','Chairs','Bedroom','Curated Comfort','SEA','',5300,'2026-06-25','white'],
+ ['2.2m Grey Fabric Sofa with Ottoman',247.83,'550days',50,'LS380SFS3I00009','p-sofa3','Sofas','Living Room','PK Series','SEA,LATAM','hot',18600,'2025-11-20','beige,grey'],
+ ['Plum 2.6m Beige Fabric Sofa',276.73,'250days',50,'LSC25SF055569','p-sofa3','Sofas','Living Room','Curated Comfort','SEA,ANZ','hot',15400,'2025-12-18','beige,black'],
+ ['Angola 0.6m dining cabinet',85.12,'7Days',1,'LSC22BG003649','p-wardrobe','Cabinets','Dining Room','PK Series','SEA,ANZ,LATAM','hot',13200,'2026-01-30','white'],
+ ['Penang Dressers with mirror',86.71,'580days',1,'LS02ZHPA1C002','p-vanity','Cabinets','Bedroom','Curated Comfort','SEA,LATAM','hot',11800,'2026-02-11','cream'],
+ ['Eton Telescopic study desk with shelf',98.99,'7Days',1,'LS02ZHTO1V042','p-desk','Tables','Home office','PK Series','ANZ,SEA','hot',10600,'2026-03-19','cream'],
+ ['Volta sintered stone TV Cabinet',83.82,'7Days',1,'LS02ZHUC1M001','p-tvstand','Cabinets','Living Room','Timeless Comfort','SEA,ANZ,LATAM','hot',12100,'2026-04-28','grey'],
+ ['3.09m Brown Leather Sofa',582.66,'70Days',1,'LSC25SF004870','p-sofa3','Sofas','Living Room','Timeless Comfort','ANZ','',2400,'2026-05-02','walnut,black,grey'],
+ ['1.81m Brown Leather Sofa',337.14,'15Days',1,'LSC25SF102619','p-sofa2','Sofas','Living Room','Timeless Comfort','SEA','',3300,'2026-06-05','walnut,cream'],
+ ['3.02m Brown + Green Solid Wood Sofa',953.34,'70Days',1,'LSC25SF119249','p-sofa3','Sofas','Living Room','Whispering Wood','ANZ,LATAM','',1200,'2026-06-28','green,walnut'],
+ ['Brown Leather Sofa',651.65,'33Days',1,'LSC25SF102488','p-sofa3','Sofas','Living Room','Cozy Retreat','SEA,ANZ','',1900,'2026-03-25','walnut,oak,cream'],
+ ['3.64m Coffee Genuine Leather Sofa',695.81,'Pending',1,'LSC25SF054275','p-sofa3','Sofas','Living Room','Timeless Comfort','ANZ','',1600,'2026-01-08','walnut,beige,grey'],
+ ['Sieghild Leather Sofa',344.22,'70Days',1,'LSC24SF032455','p-sofa2','Sofas','Living Room','Gentle Haven','SEA,LATAM','',3900,'2026-04-12','beige,white'],
+ ['2.34m Brown Leather Sofa',417.05,'15Days',1,'LSC25SF102615','p-sofa3','Sofas','Living Room','Cozy Retreat','LATAM','',2800,'2026-05-16','walnut,oak,cream,beige'],
+ ['3.1m Black Leather Sofa',544.32,'45Days',1,'LSC25SF048242','p-sofa3','Sofas','Living Room','Timeless Comfort','ANZ,LATAM','',2100,'2026-02-20','black,grey'],
+ ['Tushar 2.92m Beige Leather Sofa',525.72,'70Days',1,'LSC24SF042625','p-sofa3','Sofas','Living Room','Curated Comfort','SEA','',2500,'2026-06-18','beige,cream,walnut,grey'],
+ ['2.97m Grey Leather Sofa',485.35,'35Days',1,'LSC24SF128584','p-sofa3','Sofas','Living Room','Timeless Comfort','ANZ','',2300,'2026-03-02','grey,black,beige,cream,white'],
+ ['2.82m Dark Leather Bed',738.23,'Pending',1,'LSC25SF381122','p-bed','Beds','Bedroom','Timeless Comfort','SEA','',900,'2026-01-26','black,walnut'],
+ ['2.11m Coffee Leather Sofa',382.35,'70Days',1,'LSC25SF377133','p-sofa2','Sofas','Living Room','Cozy Retreat','LATAM,SEA','',3100,'2026-05-28','walnut,cream,beige'],
+ ['2.1m Beige Leather Sofa',319.35,'70Days',1,'LSC25SF077144','p-sofa2','Sofas','Living Room','Curated Comfort','SEA,ANZ','',3500,'2026-04-30','beige,black'],
+ ['Nolara 1.55m white sofa bed',275.43,'70Days',5,'LSC25SF047698','p-sofa2','Sofas','Living Room','Gentle Haven','ANZ,LATAM','new',2900,'2026-07-02','white,cream,grey,beige,black,walnut'],
+ ['Omar Narrow-edged night stand',31.79,'70Days',5,'LSC25SF048171','p-nightstand','Cabinets','Bedroom','PK Series','SEA','new',4700,'2026-07-06','cream,walnut'],
+ ['2.62m White Fabric Sofa',195.61,'70Days',5,'LSC25SF391919','p-sofa3','Sofas','Living Room','Gentle Haven','ANZ','new',3400,'2026-07-12','white,beige,grey'],
+ ['Ramsey Three-Drawer Dressing Table',121.39,'25Days',1,'LSC24ZTE03998','p-vanity','Cabinets','Bedroom','Curated Comfort','SEA,LATAM','new',3800,'2026-07-14','cream'],
+ ['Beige + Wood Color Computer Desk',91.47,'70Days',5,'LSC25SF047169','p-desk','Tables','Home office','Whispering Wood','ANZ,SEA','new',4200,'2026-07-16','cream,oak'],
+ ['1.8*2.0 White High-Legged Frame Bed',185.41,'20Days',5,'LSC25SF042403','p-bed','Beds','Bedroom','Gentle Haven','ANZ','new',2700,'2026-07-18','white,cream'],
+ ['1.2m Wood Color + White Dining Table',93.05,'25Days',5,'LSC25SF068485','p-dining','Tables','Dining Room','Whispering Wood','SEA,LATAM','new',5100,'2026-07-20','oak,white'],
+ ['White Dressing Stool',47.83,'70Days',5,'LSC25SF099437','p-stool','Chairs','Bedroom','Gentle Haven','SEA','',3300,'2026-06-08','white'],
+ ['Usain Sideboard',168.35,'25Days',1,'LSC24BG065099','p-tvstand','Cabinets','Dining Room','Timeless Comfort','ANZ,LATAM','',2900,'2026-05-24','white,walnut'],
+ ['White + Grey Coffee Table',94.38,'70Days',1,'LSC25CJC095137','p-coffee','Tables','Living Room','Timeless Comfort','SEA','',4600,'2026-06-12','white,grey'],
+ /* 定制拼单 */
+ ['Modular Full-House Storage System (per meter)',199.00,'45Days',10,'LSC26CZ260152','p-wardrobe','Cabinets','Bedroom','PK Series','SEA,ANZ','custom',2500,'2026-06-01','white',null,0.10],
+ ['Athenaeum Full-Wall Bookcase Combo',460.00,'45Days',8,'LSC26CB260489','p-bookcase','Cabinets','Home office','Gentle Haven','SEA','custom',2200,'2026-04-16','walnut',null,0.30],
+ ['Focus Electric Standing Desk 1.4m',210.00,'45Days',25,'LSC26TB260405','p-desk','Tables','Home office','PK Series','ANZ,LATAM','custom',6100,'2026-07-15','cream,oak',null,0.50],
+ ['Motion Power Recliner Sofa Single',199.00,'45Days',30,'LSC26SF260528','p-sofa2','Sofas','Living Room','Curated Comfort','LATAM,SEA','custom',7800,'2026-05-09','beige,grey',null,0.70],
+ ['Pulse Ergonomic Gaming Chair 4D',155.00,'45Days',25,'LSC26CH260340','p-chair','Chairs','Home office','PK Series','LATAM,SEA','custom',9800,'2026-02-14','black,green',null,0.90],
+ /* 特价清仓 */
+ ['Cirrus Cloud Sofa 4-Seater',430.00,'55Days',12,'LSC26SF260611','p-sofa3','Sofas','Living Room','Curated Comfort','SEA','sale',3900,'2026-04-25','beige,cream',560],
+ ['Cloudrest Latex Spring Mattress 2.0m',165.40,'45Days',40,'LSC26BD260677','p-mattress','Beds','Bedroom','PK Series','SEA,LATAM','sale',15400,'2025-09-05','white',210],
+ ['Hop Kids Study Desk & Chair Set',175.00,'30Days',30,'LSC26TB260606','p-desk','Tables','Kids','Curated Comfort','SEA,LATAM','sale',7300,'2026-05-18','cream,oak',220],
+ ['Cradle Bentwood Rocking Chair',120.00,'20Days',30,'LSC26CH260596','p-chair','Chairs','Living Room','Whispering Wood','LATAM','sale',3100,'2025-10-12','oak',158],
+ ['Plain 5-Drawer Chest',142.00,'7Days',30,'LSC26CB260601','p-dresser','Cabinets','Bedroom','PK Series','SEA','sale',4800,'2025-11-02','cream,walnut',185],
+ ['Calm Ceramic Aroma Set of 3',32.00,'7Days',100,'LSC26AC260604','p-shelf','Accents','Home office','Gentle Haven','SEA','sale',8100,'2025-12-20','white',46]
+];
+const GOODS = RAW.map((r,i)=>({
+  idx:i, code:'BPS'+String(i+1).padStart(3,'0'), name:r[0], price:r[1], delivery:r[2], moq:r[3], item:r[4],
+  icon:r[5], cat:r[6], space:r[7], series:r[8], regions:r[9]?r[9].split(','):[],
+  flags:r[10]?r[10].split(','):[], sales6m:r[11], hdate:r[12], sw:r[13].split(','),
+  oldPrice:r[14]||null, progress:r[15]!=null?r[15]:null
+}));
+const NOTICES = [
+  {tag:'Event', txt:'2026 Autumn GTM Global Launch goes live Sept 1 — dealer pre-registration is now open'},
+  {tag:'Logistics', txt:'SEA route shipping space is tight from August — place orders 14 days ahead to lock containers'},
+  {tag:'System', txt:'Mall maintenance on Aug 2, 02:00–04:00 (GMT+8) — ordering will be briefly paused'},
+  {tag:'Policy', txt:'Tariff adjustment for some LATAM categories — FOB prices are for reference, final quote via inquiry'}
+];
+const BANNERS = [
+  {type:'ciff', bg:'linear-gradient(102deg,#0A6B63 0%,#1CA99B 45%,#3FCFBF 78%,#7EE4D6 100%)'},
+  {k:'GTM LAUNCH · 2026 AW', h:'Autumn Collection<br>Global Launch', p:'320+ SKU debut this season · Early-bird ladder rebates on first orders',
+   cta:'Explore New Arrivals', bg:'linear-gradient(102deg,#123F5C,#2E86C1 60%,#63A9DC)', icon:'i-globe', go:{flag:'new',src:'Banner · GTM'}},
+  {k:'SUPPLY CHAIN', h:'Overseas Warehouse<br>Full &amp; Mixed Containers', p:'SEA / ANZ / LATAM warehouses · 7-day replenishment for small batches',
+   cta:'Learn More', bg:'linear-gradient(102deg,#17392B,#3E8E68 60%,#6FB893)', icon:'i-box', go:{src:'Banner · Warehouse'}}
+];
+const REQS = [
+  {m:'首页整体', t:'u', req:'首页排版顺序调整，楼层重排为：通知栏 → 轮播海报 → 分类导览 → 品类推荐1 → 系列推荐2 → 爆款推荐3 → 新品推荐4 → 大区5 → 定制产品6 → 特价产品7', impl:'按新顺序重构全部楼层；页头、页尾、商品卡、列表页、详情页样式与现网 1:1 复刻（薄荷绿服务条、teal logo、细体居中大标题、白底商品卡、$XX.XX (USD) 价格排版、teal 交期行）', api:'CMS 站点栏目 tginfoMenu 支持楼层排序/启停'},
+  {m:'① 通知栏', t:'n', req:'导航栏下方、轮播海报上方，滚动文字通知；运营端增设维护入口，可隐藏或展示', impl:'滚动轮播多条公告，配色沿用现网薄荷绿；支持整栏收起，点击可跳详情。<b>建议复用运营端「内容配置」楼层框架，在楼层类型新增「通知栏」</b>——排序 / 单条启停 / 整栏显隐 / 落地页设置 / 定时发布 / 草稿-发布双版本全部沿用现成能力，只需改运营端表单（图片上传→文案+标签）与前台新增滚动组件。不建议直接改造「轮播小海报」（会污染已有图片位数据），也不建议复用 cms_notice（该表已被企业公告占用，带 memberCode/companyCode 数据范围）', api:'cms_conttitle（楼层，conttitleType 加 NOTICE_BAR）+ cms_contlist（条目）+ cms_contlist_conf（标签等扩展）· /web/cms/conttitleBusiness'},
+  {m:'② 轮播海报', t:'k', req:'保留原位置，作为 GTM、展会活动或其他宣传内容展示区', impl:'1:1 复刻现网 CIFF 邀请函海报（日期、双 Logo、Booth/Address 要点、二维码），另加 GTM / 海外仓两帧，箭头与指示器切换', api:'/web/cms/advertise 广告位素材配置'},
+  {m:'③ 分类导览', t:'u', req:'两个分类维度；光标放在空间分类上自动展开细分类目窗格，点击跳转对应商品列表页', impl:'保留现网 7 个圆形分类入口样式，新增悬停展开细分类目窗格（6 细类）；右侧新增 SEA / ANZ / LATAM 大区专区圆形入口', api:'classtree（空间）+ pntree（品类）双维分类树'},
+  {m:'④ 品类推荐-1', t:'u', req:'大图+小图组合展示 6 核心品类（沙发/床/桌/椅/柜/小件），点击均跳对应品类列表页', impl:'沿用现网「Redefining Home Living」左大图 + 右小图版式，内容换为 6 大核心品类；悬停小图大图联动切换', api:'pntree 品类树 + ES 品类过滤'},
+  {m:'⑤ 系列推荐-2', t:'u', req:'「灵感系列」更名为系列推荐；横向展示系列图片，点击跳对应系列列表页', impl:'保留现网「Where Style Meets Function」手风琴视觉，6 大风格系列悬停展开，MORE 进入系列列表页', api:'商品系列打标（goodsProperty/rtag）+ ES 过滤'},
+  {m:'⑥ 爆款推荐-3', t:'u', req:'横向展示 5 款，箭头滑动查看，more 跳爆款列表页；按累计半年销量排序且运营端可手动调整', impl:'现网为 5 列换行网格，改为横滑 + 左右箭头；销量倒序，卡片露出近 6 月销量；more 进爆款列表页', api:'大数据 statisticRecommender 销量策略 + 运营端置顶位'},
+  {m:'⑦ 新品推荐-4', t:'u', req:'横向展示 5 款，箭头滑动查看，more 跳新品列表页', impl:'按上新时间倒序横滑展示，NEW 角标', api:'ES sortField=skuHdate（上新）'},
+  {m:'⑧ 大区-5', t:'n', req:'新增区域打标字段，按市场划分商品专区，3×2 分布产品图，more/图片跳对应列表页', impl:'SEA / ANZ / LATAM 三专区 Tab 切换，3×2 商品矩阵，卡片露出区域标；二跳列表页携带大区筛选', api:'商品域新增 regionTag 字段 → ES 同步过滤'},
+  {m:'⑨ 定制产品-6', t:'n', req:'横向展示 5 款并显示拼单进度；抓取客户加购意向清单确定展示逻辑；楼层支持悬浮或常驻可见', impl:'5 款定制品带拼单进度条（10%~90%）+ 一键参团；右下角悬浮窗常驻露出 TOP3 拼单', api:'大数据 recSimInterestCart（加购兴趣）+ promotion 拼团 + ocshopping'},
+  {m:'⑩ 特价产品-7', t:'n', req:'滞销品清仓专区；运营端新增维护入口，手动选择划定产品池', impl:'横滑特价专区，原价划线 / 特价红字对比 + SALE 角标', api:'运营端选品池 → tginfoMenu 栏目内容 / saleFlag 打标'},
+  {m:'⑪ 商品列表页', t:'u', req:'每一列表页上方设置品类分类导览，点击分类展开对应产品；列表页设置筛选栏', impl:'保留现网 All Categories 胶囊行、5 列网格、分页器；新增品类导览 Tab（带在售数量）、Space/Series/Region/Price 四组筛选、Best Match/销量/价格/上新排序、已选条件可单独清除', api:'ES find.json 多维过滤 + 新增 salesVolume6m 排序字段'},
+  {m:'⑫ 商品详情页', t:'k', req:'（未提优化，1:1 复刻）', impl:'缩略图列 + 主图轮播、Block/Custom 与 Variations/List Mode 分段控件、Color/Dim/Material 选择、QTY 步进器与 MOQ、Add to Shopping list、Description/Size Chart/Material/Installation/Recommend 标签页、Attributes 表格、场景大图轮播、Same Series/Category/Style 三组推荐', api:'/web/rs/resourceGoods · getResourceGoods + RsSku 规格'},
+  {m:'⑬ 数据埋点', t:'n', req:'增设埋点，实现点击率与转化率等数据监测分析', impl:'全楼层交互均已挂埋点事件（楼层曝光 / 点击 / 加购 / 参团 / 筛选 / 选规格，楼层×商品维度，静默上报），控制台可查看事件流', api:'前端埋点 SDK → FlowData / 大数据平台回流分析'}
+];
+
+/* ═══════════ 工具 ═══════════ */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const fmt = n => n.toLocaleString('en-US');
+const byCode = c => GOODS.find(g => g.code === c);
+const palStyle = k => {const p=PAL[k]||PAL.beige;return `--c1:${p[0]};--c2:${p[1]};--c3:${p[2]}`};
+const state = {
+  cart:new Map(), wish:new Set(),
+  filters:{cat:'All',space:null,series:null,region:null,price:null,flag:null,kw:null,src:null,chip:null,sort:'default',sortDir:-1,page:1},
+  filterOpen:false,
+  bannerIdx:0, noticeIdx:0, heroIdx:0, regionIdx:0, seriesIdx:0, catTab:0,
+  dt:{code:null,img:0,color:0,dim:0,mat:0,qty:1,tab:0,life:0,mode:0,vmode:0}
+};
+const FLAGNAME = {hot:'Best Sellers', new:'New Arrivals', sale:'Clearance Deals', custom:'Group Orders'};
+const PRICE_BANDS = [['$0 – 99',0,99],['$100 – 199',100,199],['$200 – 399',200,399],['$400 +',400,1e9]];
+const PER_PAGE = 20;
+
+function toast(msg, ok){
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=(ok?'<span class="ok">✔</span>':'')+msg;
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='.3s';setTimeout(()=>t.remove(),300)},2200);
+}
+function track(m,a,o){try{console.debug('[track]',m,a,o||'')}catch(e){}}
+function ico(g,w,h){return `<svg width="${w||150}" height="${h||120}" style="${palStyle(g.sw?g.sw[0]:g.pal)}"><use href="#${g.icon}"/></svg>`}
+
+/* ═══════════ 商品卡（现网 1:1） ═══════════ */
+function cardHTML(g, opt={}){
+  const flag = g.flags[0];
+  const corner = flag ? `<span class="corner ${flag}">${{hot:'HOT',new:'NEW',sale:'SALE',custom:'CO-CREATE'}[flag]}</span>` : '';
+  const [pi,pd] = g.price.toFixed(2).split('.');
+  const sw = g.sw.map((k,i)=>`<i data-sw="${i}" style="background:${SWHEX[k]||'#EEE'}"></i>`).join('');
+  const rgs = opt.showRegion ? `<div class="rgs">${g.regions.map(r=>`<span class="rg-tag">${REGIONS.find(x=>x.short===r).flag} ${r}</span>`).join('')}</div>` : '';
+  const prog = (opt.progress && g.progress!=null) ? `
+    <div class="gb-progress"><div class="lbl"><span>Group progress</span><b>${Math.round(g.progress*100)}%</b></div>
+    <div class="gb-bar"><i data-w="${g.progress*100}"></i></div></div>
+    <button class="gb-join" data-join="${g.code}">Join Group Order</button>` : '';
+  return `<div class="pcard" data-code="${g.code}">
+    <div class="pc-head"><span class="bb"><span class="lg">LINSY</span>林氏家居</span>${corner}</div>
+    <div class="pimg">${ico(g)}${rgs}<button class="addcart" data-add="${g.code}" title="Add to shopping list"><svg><use href="#i-plus"/></svg></button></div>
+    <div class="sw">${sw}</div>
+    <div class="pn"><span class="nm">${g.name}</span><span class="wish ${state.wish.has(g.code)?'on':''}" data-wish="${g.code}"><svg><use href="#i-heart"/></svg></span></div>
+    <div class="pp${g.oldPrice?' red':''}"><span class="c">$</span><b>${pi}</b><span class="d">.${pd}</span><span class="u">(USD)</span>${g.oldPrice?`<span class="old">$${g.oldPrice.toFixed(2)}</span>`:''}</div>
+    <div class="pd">Delivery Date: ${g.delivery}&nbsp;&nbsp;&nbsp;MOQ: ${g.moq}pcs</div>
+    <div class="pi">Item: ${g.item}${opt.showSales?` <span class="s6">· 6-mo ${fmt(g.sales6m)}</span>`:''}</div>
+    ${prog}
+  </div>`;
+}
+function bindCards(root, from){
+  root.querySelectorAll('.pcard').forEach(el=>{
+    el.addEventListener('click', e=>{
+      const code = el.dataset.code, g = byCode(code);
+      if(e.target.closest('[data-add]')){ addCart(code, from); return; }
+      if(e.target.closest('[data-join]')){ joinGroup(code, from); return; }
+      const w = e.target.closest('[data-wish]');
+      if(w){ toggleWish(code, w, from); return; }
+      const s = e.target.closest('[data-sw]');
+      if(s){
+        const i = +s.dataset.sw;
+        el.querySelectorAll('[data-sw]').forEach(x=>x.classList.remove('on'));
+        s.classList.add('on');
+        const p = PAL[g.sw[i]]||PAL.beige;
+        const svg = el.querySelector('.pimg svg');
+        svg.style.setProperty('--c1',p[0]);svg.style.setProperty('--c2',p[1]);svg.style.setProperty('--c3',p[2]);
+        track(from,'切换色板',code+'·'+g.sw[i]);
+        return;
+      }
+      track(from,'点击商品',code);
+      openDetail(code);
+    });
+  });
+  requestAnimationFrame(()=>setTimeout(()=>{root.querySelectorAll('.gb-bar i').forEach(i=>i.style.width=i.dataset.w+'%')},60));
+}
+function toggleWish(code, el, from){
+  if(state.wish.has(code)){state.wish.delete(code);el.classList.remove('on');toast('Removed from wishlist')}
+  else{state.wish.add(code);el.classList.add('on');toast('Added to wishlist',true)}
+  track(from||'商品卡','收藏',code);
+}
+
+/* ═══════════ ① 通知栏 ═══════════ */
+function renderNotice(){
+  $('#noticeTrack').innerHTML = NOTICES.map(n=>`<div class="notice-item"><span class="tg">${n.tag}</span>${n.txt}</div>`).join('');
+  setInterval(()=>{state.noticeIdx=(state.noticeIdx+1)%NOTICES.length;
+    $('#noticeTrack').style.transform=`translateY(-${state.noticeIdx*34}px)`},4000);
+  $('#noticeTrack').addEventListener('click',()=>{track('通知栏','点击公告');toast('Demo：跳转公告详情页')});
+  $('#noticeClose').addEventListener('click',()=>{$('#noticeBar').style.display='none';toast('通知栏已收起（运营端可配置默认展示 / 隐藏）')});
+}
+
+/* ═══════════ ② 轮播 ═══════════ */
+let bannerTimer;
+function slideHTML(s){
+  if(s.type==='ciff') return `<div class="b-inner">
+    <div class="b-date"><span class="k">Date:</span><b>March 18th</b><span class="to">— 21st. 2026</span></div>
+    <div class="b-logos"><span class="l1">LINSY</span><span class="x">×</span><span class="l2">Ciff</span></div>
+    <div class="b-tx"><h3>LINSY × CIFF<br>INVITATION</h3>
+      <p>Explore our latest collection and<br>Join LINSY Global Franchise Business</p>
+      <div class="bullets">
+        <div class="bl"><div class="k">Booth No.:</div><div class="v">Area A<br>L1, Hall2.1, Stand B20 &amp; L2, Hall2.2, Stand B08</div></div>
+        <div class="bl"><div class="k">Address:</div><div class="v">Phase I, Canton Fair Complex, Pazhou,<br>Guangzhou, China</div></div>
+      </div>
+      <span class="b-cta">Book a Meeting →</span></div>
+    <div class="b-qr"><span class="qr"><i></i></span><span>OFFICIAL WEBSITE</span></div>
+    <div class="b-deco"></div><div class="b-deco2"></div>
+    <div class="b-ic"><svg width="260" height="260"><use href="#i-globe"/></svg></div></div>`;
+  return `<div class="b-inner">
+    <div class="b-logos" style="top:58px"><span class="l1">LINSY</span><span class="x" style="font-size:12px;opacity:.85">${s.k}</span></div>
+    <div class="b-tx" style="top:106px"><h3>${s.h}</h3><p>${s.p}</p><span class="b-cta">${s.cta} →</span></div>
+    <div class="b-deco"></div><div class="b-deco2"></div>
+    <div class="b-ic"><svg width="260" height="260"><use href="#${s.icon}"/></svg></div></div>`;
+}
+function renderBanner(){
+  const b = $('#banner');
+  BANNERS.forEach((s,i)=>{
+    const d = document.createElement('div');
+    d.className = 'b-slide'+(i===0?' cur':''); d.style.background = s.bg;
+    d.innerHTML = slideHTML(s);
+    d.querySelector('.b-cta').addEventListener('click',ev=>{ev.stopPropagation();
+      track('轮播海报','点击CTA',s.k||'CIFF');
+      s.go?goList(s.go):toast('Demo：跳转 CIFF 展会预约页')});
+    b.insertBefore(d, $('#bDots'));
+    const dot=document.createElement('i'); if(i===0)dot.className='cur';
+    dot.addEventListener('click',()=>setBanner(i,true)); $('#bDots').appendChild(dot);
+  });
+  $$('.b-arrow').forEach(a=>a.addEventListener('click',()=>setBanner((state.bannerIdx+ +a.dataset.bmove+BANNERS.length)%BANNERS.length,true)));
+  b.addEventListener('mouseenter',()=>clearInterval(bannerTimer));
+  b.addEventListener('mouseleave',startBannerAuto);
+  startBannerAuto();
+}
+function startBannerAuto(){clearInterval(bannerTimer);bannerTimer=setInterval(()=>setBanner((state.bannerIdx+1)%BANNERS.length),5500)}
+function setBanner(i,manual){state.bannerIdx=i;
+  $$('.b-slide').forEach((s,j)=>s.classList.toggle('cur',j===i));
+  $$('#bDots i').forEach((d,j)=>d.classList.toggle('cur',j===i));
+  if(manual) track('轮播海报','切换','Slide '+(i+1));
+}
+
+/* ═══════════ ③ 分类导览 ═══════════ */
+let mmTimer;
+function renderCatNav(){
+  $('#catSpaceRow').innerHTML = SPACES.map((s,i)=>`<div class="cs-item" data-si="${i}">
+    <span class="cir">${s.short}</span><span>${s.name}</span></div>`).join('');
+  $('#catRegionRow').innerHTML = REGIONS.map(r=>`<div class="cs-item rgn" data-region="${r.short}">
+    <span class="cir">${r.flag}</span><span>${r.name} Zone</span></div>`).join('');
+  $$('#catSpaceRow .cs-item').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{clearTimeout(mmTimer);openMM(+el.dataset.si)});
+    el.addEventListener('mouseleave',()=>{mmTimer=setTimeout(closeMM,180)});
+    el.addEventListener('click',()=>{const s=SPACES[+el.dataset.si];track('分类导览','点击空间',s.name);
+      goList(s.name==='New Arrivals'?{flag:'new',src:'Category Nav'}:{space:s.name,src:'Category Nav'})});
+  });
+  $('#megamenu').addEventListener('mouseenter',()=>clearTimeout(mmTimer));
+  $('#megamenu').addEventListener('mouseleave',()=>{mmTimer=setTimeout(closeMM,180)});
+  $$('#catRegionRow .cs-item').forEach(ch=>ch.addEventListener('click',()=>{
+    track('分类导览','点击大区专区',ch.dataset.region);
+    goList({region:ch.dataset.region,src:'Zone Nav'})}));
+}
+function openMM(i){
+  const s = SPACES[i];
+  $$('#catSpaceRow .cs-item').forEach((el,j)=>el.classList.toggle('open',j===i));
+  const mm = $('#megamenu');
+  mm.innerHTML = `<div class="mm-h"><b>${s.name} · Sub-categories</b><span>③ 新增：悬停自动展开细分类目窗格，点击进入对应商品列表页</span></div>
+    <div class="mm-grid">${s.subs.map(([n,cat,ic])=>`<div class="mm-cell" data-space="${s.name}" data-cat="${cat}" data-sub="${n}">
+      <svg viewBox="0 0 200 160" style="${palStyle('cream')}"><use href="#${ic}"/></svg><b>${n}</b><i>${cat}</i></div>`).join('')}</div>
+    <div class="mm-foot">💡 分类数据来源：空间 classtree × 品类 pntree 双维度 · <a data-space-all>View all in ${s.name} →</a></div>`;
+  mm.classList.add('show');
+  mm.querySelectorAll('.mm-cell').forEach(c=>c.addEventListener('click',()=>{
+    track('分类导览','点击细分类目',c.dataset.space+'·'+c.dataset.sub);
+    goList({space:c.dataset.space,cat:c.dataset.cat,src:'Category Nav · '+c.dataset.sub})}));
+  mm.querySelector('[data-space-all]').addEventListener('click',()=>goList({space:s.name,src:'Category Nav'}));
+}
+function closeMM(){$('#megamenu').classList.remove('show');$$('#catSpaceRow .cs-item').forEach(el=>el.classList.remove('open'))}
+
+/* ═══════════ ④ 品类推荐 ═══════════ */
+function renderCatRec(){
+  $('#crCells').innerHTML = CATS.map((c,i)=>`<div class="cr-cell${i===state.heroIdx?' cur':''}" data-ci="${i}">
+    <svg viewBox="0 0 200 160" style="${palStyle(c.pal)}"><use href="#${c.icon}"/></svg>
+    <b>${c.name}</b><i>${c.cn}</i>
+    <button type="button" class="cr-more" aria-label="View more ${c.name}" data-cat="${c.name}">more <svg><use href="#i-arr-r"/></svg></button></div>`).join('');
+  $$('#crCells .cr-cell').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{state.heroIdx=+el.dataset.ci;renderHero();
+      $$('#crCells .cr-cell').forEach((x,j)=>x.classList.toggle('cur',j===state.heroIdx))});
+  });
+  $$('#crCells .cr-more').forEach(btn=>btn.addEventListener('click',ev=>{
+    ev.stopPropagation();
+    track('品类推荐','点击more',btn.dataset.cat);
+    goList({cat:btn.dataset.cat,src:'Category Picks · More'});
+  }));
+  renderHero();
+}
+function renderHero(){
+  const c = CATS[state.heroIdx], p = PAL[c.pal];
+  const top = GOODS.filter(g=>g.cat===c.name).sort((a,b)=>b.sales6m-a.sales6m)[0];
+  const hero = $('#crHero');
+  hero.style.background = `linear-gradient(150deg,${p[1]},${p[0]})`;
+  hero.innerHTML = `<div class="big-ic"><svg viewBox="0 0 200 160" style="${palStyle(c.pal)}"><use href="#${c.icon}"/></svg></div>
+    <div class="hero-tx"><div class="en">${c.en}</div><div class="cn">${c.name} · ${c.cn}</div>
+    <p>${c.desc}<br>Top pick: ${top?top.name:'-'}${top?' · '+fmt(top.sales6m)+' sold / 6 mo':''}</p>
+    <span class="gobtn">Shop ${c.name} →</span></div>`;
+  hero.onclick = null;
+}
+
+/* ═══════════ ⑤ 系列推荐 ═══════════ */
+function renderSeries(){
+  const tr = $('#seriesTrack');
+  tr.innerHTML = SERIES.map((s,i)=>{
+    const cnt = GOODS.filter(g=>g.series===s.name).length, p = PAL[s.pal];
+    return `<div class="sp${i===state.seriesIdx?' open':''}" data-si="${i}" style="background:linear-gradient(150deg,${p[1]},${p[0]})">
+      <div class="bgic"><svg viewBox="0 0 200 160" style="${palStyle(s.pal)}"><use href="#${s.icon}"/></svg></div>
+      <div class="big"><div class="bn">${s.name}</div><div class="tg">${s.tag}</div><div class="cnt">${cnt} SKUs on sale</div>
+        <span class="mo2">MORE →</span></div>
+      <div class="lbl"><b>${s.name}</b><span class="mo">MORE ›</span></div></div>`;
+  }).join('');
+  tr.querySelectorAll('.sp').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{const i=+el.dataset.si;
+      if(i!==state.seriesIdx){state.seriesIdx=i;tr.querySelectorAll('.sp').forEach((x,j)=>x.classList.toggle('open',j===i))}});
+    el.addEventListener('click',()=>{const s=SERIES[+el.dataset.si];track('系列推荐','点击系列',s.name);
+      goList({series:s.name,src:'Style Series'})});
+  });
+}
+
+/* ═══════════ 横滑楼层 ═══════════ */
+function renderStrip(id,list,from,opt={}){
+  const tr=$(id); tr.innerHTML=list.map(g=>cardHTML(g,opt)).join(''); bindCards(tr,from);
+}
+function initHScroll(){
+  $$('.hscroll').forEach(h=>{
+    const tr=h.querySelector('.hs-track'),prev=h.querySelector('.prev'),next=h.querySelector('.next');
+    const upd=()=>{prev.classList.toggle('off',tr.scrollLeft<10);
+      next.classList.toggle('off',tr.scrollLeft>tr.scrollWidth-tr.clientWidth-10)};
+    prev.addEventListener('click',()=>tr.scrollBy({left:-tr.clientWidth*.8,behavior:'smooth'}));
+    next.addEventListener('click',()=>tr.scrollBy({left:tr.clientWidth*.8,behavior:'smooth'}));
+    tr.addEventListener('scroll',upd); setTimeout(upd,180);
+  });
+}
+
+/* ═══════════ ⑧ 大区 ═══════════ */
+function renderRegion(){
+  $('#regionTabs').innerHTML = REGIONS.map((r,i)=>
+    `<span class="rt${i===state.regionIdx?' cur':''}" data-ri="${i}"><span class="flag">${r.flag}</span>${r.name}<span class="more-in">more›</span></span>`).join('');
+  $$('#regionTabs .rt').forEach(el=>el.addEventListener('click',()=>{
+    const i=+el.dataset.ri;
+    if(i===state.regionIdx){goList({region:REGIONS[i].short,src:'Global Marketplace'});return}
+    state.regionIdx=i;track('全球风向标','切换专区',REGIONS[i].short);renderRegion()}));
+  const r = REGIONS[state.regionIdx];
+  $('#regionNote').textContent = '🏷 '+r.note+' · regionTag';
+  const list = GOODS.filter(g=>g.regions.includes(r.short)&&!g.flags.includes('custom')).sort((a,b)=>b.sales6m-a.sales6m).slice(0,6);
+  const grid=$('#regionGrid'); grid.innerHTML=list.map(g=>cardHTML(g,{showRegion:true})).join(''); bindCards(grid,'全球风向标');
+  $('#regionMore').onclick=()=>{track('全球风向标','点击more',r.short);goList({region:r.short,src:'Global Marketplace'})};
+}
+
+/* ═══════════ ⑨ 定制拼单 ═══════════ */
+const customList = ()=>GOODS.filter(g=>g.flags.includes('custom')).sort((a,b)=>a.progress-b.progress);
+function renderCustom(){
+  renderStrip('#customTrack',customList(),'定制产品',{progress:true});
+  const top3=[...customList()].sort((a,b)=>b.progress-a.progress).slice(0,3);
+  $('#gbFloatBody').innerHTML = top3.map(g=>`<div class="it" data-code="${g.code}">
+    <div class="nm">${g.name}</div><div class="gb-bar"><i style="width:${g.progress*100}%"></i></div>
+    <div class="pc"><span>${Math.round(g.progress*100)}% grouped</span><span>MOQ ${g.moq}</span></div></div>`).join('')
+    + `<button class="goall" id="gbGoAll">View all group orders →</button>`;
+  $$('#gbFloatBody .it').forEach(el=>el.addEventListener('click',()=>{track('定制悬浮窗','点击商品',el.dataset.code);openDetail(el.dataset.code)}));
+  $('#gbGoAll').addEventListener('click',()=>{$('#floorCustom').scrollIntoView({behavior:'smooth'})});
+}
+function joinGroup(code,from){
+  const g=byCode(code); g.progress=Math.min(.99,+(g.progress+.04).toFixed(2));
+  track(from||'定制产品','参与拼单',code); addCart(code,from||'定制产品',true); renderCustom();
+  toast(`Joined group order: ${g.name} · now ${Math.round(g.progress*100)}%`,true);
+}
+
+/* ═══════════ 购物车 ═══════════ */
+function addCart(code,from,silent,qty){
+  const g=byCode(code);
+  state.cart.set(code,(state.cart.get(code)||0)+(qty||g.moq));
+  track(from||'商品卡','加购',code); updateCartBadge();
+  if(!silent) toast(`Added to shopping list: ${g.name} × ${qty||g.moq} pcs`,true);
+}
+function updateCartBadge(){const b=$('#cartBadge');if(!b)return;const n=state.cart.size;b.textContent=n;b.classList.toggle('hidden',n===0)}
+function renderCart(){
+  const bd=$('#cartBody');
+  if(!state.cart.size){bd.innerHTML='<div class="ct-empty">Your shopping list is empty.</div>';
+    $('#cartSum').textContent='$0';$('#cartCntTxt').textContent='0 items';return}
+  let sum=0,rows='';
+  state.cart.forEach((qty,code)=>{
+    const g=byCode(code); sum+=qty*g.price;
+    rows+=`<div class="ct-item"><div class="im">${ico(g,50,40)}</div>
+      <div class="inf"><div class="nm">${g.name}</div><div class="mt">${g.item} · $${g.price.toFixed(2)}/pc · MOQ ${g.moq}</div>
+      <div class="ct-qty"><button data-q="-1" data-code="${code}">−</button><span>${qty}</span><button data-q="1" data-code="${code}">＋</button></div>
+      <div class="pr">$${fmt(Math.round(qty*g.price))}</div></div><span class="rm" data-rm="${code}">Remove</span></div>`;
+  });
+  bd.innerHTML=rows;
+  $('#cartSum').textContent='$'+fmt(Math.round(sum));
+  $('#cartCntTxt').textContent=state.cart.size+' items';
+  bd.querySelectorAll('[data-q]').forEach(b=>b.addEventListener('click',()=>{
+    const code=b.dataset.code,g=byCode(code);
+    let q=state.cart.get(code)+(+b.dataset.q)*g.moq; if(q<g.moq)q=g.moq;
+    state.cart.set(code,q);renderCart()}));
+  bd.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{
+    state.cart.delete(b.dataset.rm);renderCart();updateCartBadge()}));
+}
+function openCart(){renderCart();$('#cartMask').classList.add('show');$('#cartDrawer').classList.add('show');track('导航栏','打开购物车')}
+function closeCart(){$('#cartMask').classList.remove('show');$('#cartDrawer').classList.remove('show')}
+
+/* ═══════════ 商品列表页 ═══════════ */
+function goList(p={}){
+  const f=state.filters;
+  Object.assign(f,{cat:'All',space:null,series:null,region:null,price:null,flag:null,kw:null,src:null,chip:null,sort:'default',sortDir:-1,page:1});
+  if(p.cat) f.cat=p.cat;
+  ['space','series','region','flag','kw','src','chip'].forEach(k=>{if(p[k])f[k]=p[k]});
+  if(p.space) f.chip=p.space;
+  if(f.flag==='hot') f.sort='sales';
+  if(f.flag==='new'){f.sort='date';f.chip='New Arrivals'}
+  switchView('list'); renderList(); window.scrollTo({top:0});
+}
+function filteredGoods(ignoreCat){
+  const f=state.filters;
+  return GOODS.filter(g=>{
+    if(!ignoreCat && f.cat!=='All' && g.cat!==f.cat) return false;
+    if(f.space && g.space!==f.space) return false;
+    if(f.series && g.series!==f.series) return false;
+    if(f.region && !g.regions.includes(f.region)) return false;
+    if(f.flag && !g.flags.includes(f.flag)) return false;
+    if(f.kw && !(g.name+g.item).toLowerCase().includes(f.kw.toLowerCase())) return false;
+    if(f.price){const b=PRICE_BANDS[f.price];if(g.price<b[1]||g.price>b[2])return false}
+    return true;
+  });
+}
+function renderChips(){
+  const f=state.filters;
+  $('#catChips').innerHTML = SPACES.map(s=>`<div class="cchip${f.chip===s.name?' cur':''}" data-chip="${s.name}">
+    <span class="th"><svg viewBox="0 0 200 160" style="${palStyle('cream')}"><use href="#${s.subs[0][2]}"/></svg></span>${s.name}</div>`).join('');
+  $$('#catChips .cchip').forEach(c=>c.addEventListener('click',()=>{
+    const n=c.dataset.chip;
+    track('列表页','点击 All Categories 胶囊',n);
+    if(f.chip===n){f.chip=null;f.space=null;f.flag=null}
+    else if(n==='New Arrivals'){goList({flag:'new',src:'All Categories'});return}
+    else{goList({space:n,src:'All Categories'});return}
+    f.page=1; renderList();
+  }));
+}
+function renderList(){
+  const f=state.filters;
+  const crumbName = f.flag?FLAGNAME[f.flag]:f.region?REGIONS.find(r=>r.short===f.region).name+' Zone':
+    f.series?f.series:f.space?f.space:(f.cat!=='All'?f.cat:'All Products');
+  $('#crumbCur').textContent = crumbName;
+  $('#crumbSrc').textContent = f.src?`（from: ${f.src}${f.kw?' · search "'+f.kw+'"':''}）`:(f.kw?`（search "${f.kw}"）`:'');
+  renderChips();
+  /* 品类导览 Tab + 筛选收起按钮 */
+  const base=filteredGoods(true);
+  const tabs=[['All',base.length],...CATS.map(c=>[c.name,base.filter(g=>g.cat===c.name).length])];
+  const fn=['space','series','region'].filter(k=>f[k]).length+(f.price!=null?1:0);
+  $('#listCatTabs').innerHTML='<span class="lb">品类导览</span>'+tabs.map(([n,c])=>
+    `<span class="lc-tab${f.cat===n?' cur':''}" data-cat="${n}">${n}<span class="c">${c}</span></span>`).join('')
+    +`<span class="tb-spacer"></span>
+      <button class="btn-filter${state.filterOpen?' on':''}" id="btnFilter">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+        筛选${fn?`<b>${fn}</b>`:''}<i class="caret">${state.filterOpen?'▲':'▼'}</i></button>`;
+  $$('#listCatTabs .lc-tab').forEach(t=>t.addEventListener('click',()=>{
+    f.cat=t.dataset.cat;f.page=1;track('列表页','点击品类导览',f.cat);renderList()}));
+  $('#filterPanel').classList.toggle('hidden',!state.filterOpen);
+  $('#btnFilter').addEventListener('click',()=>{
+    state.filterOpen=!state.filterOpen;
+    $('#filterPanel').classList.toggle('hidden',!state.filterOpen);
+    $('#btnFilter').classList.toggle('on',state.filterOpen);
+    $('#btnFilter').querySelector('.caret').textContent=state.filterOpen?'▲':'▼';
+    track('列表页','筛选栏',state.filterOpen?'展开':'收起')});
+  /* 筛选栏 */
+  const frow=(lb,ops,key,cur,vals)=>`<div class="f-row"><span class="lb" style="width:86px;flex-shrink:0;color:var(--hint)">${lb}</span><div class="f-ops">
+    <span class="f-op${cur==null?' cur':''}" data-f="${key}" data-v="">All</span>
+    ${ops.map((o,i)=>{const v=vals?vals[i]:o;return `<span class="f-op${String(cur)===String(v)?' cur':''}" data-f="${key}" data-v="${v}">${o}</span>`}).join('')}</div></div>`;
+  $('#filterbar').innerHTML =
+    frow('Space',SPACES.slice(1,6).map(s=>s.name),'space',f.space) +
+    frow('Series',SERIES.map(s=>s.name),'series',f.series) +
+    frow('Region Zone',REGIONS.map(r=>r.flag+' '+r.name),'region',f.region,REGIONS.map(r=>r.short)) +
+    frow('Price (FOB)',PRICE_BANDS.map(b=>b[0]),'price',f.price,PRICE_BANDS.map((b,i)=>i));
+  $$('#filterbar .f-op').forEach(op=>op.addEventListener('click',()=>{
+    const k=op.dataset.f,v=op.dataset.v;
+    f[k]= v===''?null:(k==='price'?+v:v);
+    f.page=1;track('列表页','筛选',`${k}=${v||'All'}`);renderList()}));
+  /* 排序 */
+  const sorts=[['default','Best Match'],['sales','6-Month Sales'],['price','Price'],['date','Newest']];
+  const list=filteredGoods();
+  $('#sortbar').innerHTML='<span class="lb" style="width:86px;flex-shrink:0;color:var(--hint);font-size:12px">排序</span>'+
+    sorts.map(([k,n])=>`<span class="s-op${f.sort===k?' cur':''}" data-s="${k}">${n}${k==='price'?(f.sort==='price'?(f.sortDir>0?' ↑':' ↓'):' ⇅'):''}${k==='sales'&&f.sort==='sales'?' ↓':''}</span>`).join('')
+    +`<span class="cnt"><b>${list.length}</b> products</span>`;
+  $$('#sortbar .s-op').forEach(s=>s.addEventListener('click',()=>{
+    const k=s.dataset.s;
+    if(k==='price'&&f.sort==='price')f.sortDir*=-1;else f.sortDir=k==='price'?1:-1;
+    f.sort=k;f.page=1;track('列表页','排序',k);renderList()}));
+  /* 已选 chips */
+  const chips=[];
+  if(f.kw)chips.push(['kw','Search: '+f.kw]);
+  if(f.flag)chips.push(['flag',FLAGNAME[f.flag]]);
+  if(f.space)chips.push(['space',f.space]);
+  if(f.series)chips.push(['series',f.series]);
+  if(f.region)chips.push(['region',f.region+' Zone']);
+  if(f.price!=null)chips.push(['price',PRICE_BANDS[f.price][0]]);
+  if(f.cat!=='All')chips.push(['cat',f.cat]);
+  $('#activeChips').innerHTML = chips.length
+    ? '<span style="color:var(--hint);width:86px;flex-shrink:0;font-size:12px">已选条件</span>'
+      +chips.map(([k,n])=>`<span class="a-chip">${n}<span class="x" data-ck="${k}">✕</span></span>`).join('')
+      +'<span class="a-clear" id="clearAll">清空全部</span>'
+    : '';
+  $('#activeChips').style.paddingBottom = chips.length?'10px':'0';
+  $$('#activeChips .x').forEach(x=>x.addEventListener('click',()=>{
+    const k=x.dataset.ck; if(k==='cat')f.cat='All';else f[k]=null;
+    if(k==='space'||k==='flag')f.chip=null; f.page=1;renderList()}));
+  const ca=$('#clearAll'); if(ca)ca.addEventListener('click',()=>{
+    Object.assign(f,{cat:'All',space:null,series:null,region:null,price:null,flag:null,kw:null,chip:null,page:1});renderList()});
+  /* 网格 */
+  const sorted=[...list];
+  if(f.sort==='sales')sorted.sort((a,b)=>b.sales6m-a.sales6m);
+  else if(f.sort==='price')sorted.sort((a,b)=>(a.price-b.price)*f.sortDir);
+  else if(f.sort==='date')sorted.sort((a,b)=>b.hdate.localeCompare(a.hdate));
+  else sorted.sort((a,b)=>(b.flags.length*4000+b.sales6m)-(a.flags.length*4000+a.sales6m));
+  const pages=Math.max(1,Math.ceil(sorted.length/PER_PAGE));
+  if(f.page>pages)f.page=1;
+  const pageItems=sorted.slice((f.page-1)*PER_PAGE,f.page*PER_PAGE);
+  $('#listGrid').innerHTML=pageItems.map(g=>cardHTML(g,{showRegion:true,showSales:true})).join('');
+  bindCards($('#listGrid'),'列表页');
+  $('#listEmpty').classList.toggle('hidden',pageItems.length>0);
+  renderPager(pages);
+}
+function renderPager(pages){
+  const f=state.filters, total=57, cur=f.page;
+  let html=`<button class="pg ${cur===1?'dis':''}" data-p="${cur-1}"><svg width="12" height="12"><use href="#i-arr-l"/></svg></button>`;
+  const shown=[];
+  for(let i=1;i<=Math.min(6,Math.max(pages,6));i++) shown.push(i);
+  shown.forEach(i=>{html+=`<button class="pg ${i===cur?'cur':''} ${i>pages?'dis':''}" data-p="${i}">${i}</button>`});
+  html+=`<span class="pg dots">…</span><button class="pg dis" data-p="${total}">${total}</button>`;
+  html+=`<button class="pg ${cur>=pages?'dis':''}" data-p="${cur+1}"><svg width="12" height="12"><use href="#i-arr-r"/></svg></button>`;
+  $('#pager').innerHTML=html;
+  $$('#pager .pg[data-p]').forEach(b=>b.addEventListener('click',()=>{
+    const p=+b.dataset.p; if(p<1||p>pages)return;
+    f.page=p;track('列表页','翻页','P'+p);renderList();
+    $('#viewList').scrollIntoView({behavior:'smooth',block:'start'})}));
+}
+
+/* ═══════════ 商品详情页 ═══════════ */
+const DT_COLORS = {beige:'Beige',grey:'Light grey',walnut:'brown',oak:'Wood color',white:'White',green:'Green',terra:'Coffee',black:'Black',cream:'Cream'};
+function dtDims(g){const b=1500+((g.idx*130)%900);return [`${b}.00*930.00*740.00`,`${b+420}.63*903.00*740.00`,`${b+620}.30*930.00*740.00`]}
+function openDetail(code){
+  state.dt={code,img:0,color:0,dim:0,mat:0,qty:1,tab:0,life:0,mode:0,vmode:0};
+  switchView('detail'); renderDetail(); window.scrollTo({top:0});
+}
+function renderDetail(){
+  const d=state.dt, g=byCode(d.code); if(!g)return;
+  $('#dtCrumb').textContent = g.name;
+  const palKey = g.sw[d.color]||g.sw[0];
+  /* 缩略图 + 主图 */
+  $('#dtThumbs').innerHTML = Array.from({length:6},(_,i)=>
+    `<div class="th${i===d.img?' cur':''}" data-im="${i}"><svg viewBox="0 0 200 160" style="${palStyle(palKey)}"><use href="#${g.icon}"/></svg></div>`).join('');
+  $$('#dtThumbs .th').forEach(t=>t.addEventListener('click',()=>{d.img=+t.dataset.im;track('详情页','切换图片','#'+d.img);renderDetail()}));
+  const main=$('#dtMain');
+  main.querySelector('svg.dt-prod')?.remove();
+  const sv=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  sv.setAttribute('class','dt-prod');
+  sv.setAttribute('viewBox','0 0 200 160'); sv.setAttribute('style',palStyle(palKey));
+  sv.innerHTML=`<use href="#${g.icon}"/>`; main.insertBefore(sv,main.firstChild);
+  /* 右侧信息 */
+  const [pi,pd]=g.price.toFixed(2).split('.');
+  const dims=dtDims(g);
+  const model = 'PS'+(100+g.idx%90);
+  $('#dtInfo').innerHTML = `
+    <h1>${g.name}</h1>
+    <div class="dt-meta"><span>Item：${model} ${g.item}</span><span>status：${g.delivery==='Pending'?'Pending':'Current'}</span></div>
+    <div class="seg" id="segMode"><button class="${d.mode===0?'cur':''}" data-m="0">Block</button><button class="${d.mode===1?'cur':''}" data-m="1">Custom</button></div>
+    <div class="dt-price"><b>${pi}</b><span class="d">.${pd}</span><span class="u">(USD)</span>${g.oldPrice?`<span class="old">$${g.oldPrice.toFixed(2)}</span>`:''}</div>
+    <div class="dt-spec"><span>Estimated Installation Time: ${20+(g.idx%5)*10}minutes</span><span>Delivery Date: ${g.delivery}</span></div>
+    <div class="dt-spec"><span>Dim: ${dims[d.dim].split('*')[0]}(L)mm*${dims[d.dim].split('*')[1]}mm(W)*${dims[d.dim].split('*')[2]}mm(H)</span><span>CBM: ${(0.4+g.idx%20*0.06).toFixed(3)}m³</span><span>G.W.: ${(15+g.idx%60).toFixed(1)}kg</span></div>
+    <div class="seg" id="segView"><button class="${d.vmode===0?'cur':''}" data-v="0">Variations</button><button class="${d.vmode===1?'cur':''}" data-v="1">List Mode</button></div>
+    <div class="dt-group"><div class="lb">Color:</div><div class="opt-chips" id="optColor">
+      ${g.sw.map((k,i)=>`<span class="ochip${i===d.color?' cur':''}" data-c="${i}"><i class="dot" style="background:${SWHEX[k]}"></i>${DT_COLORS[k]||k}</span>`).join('')}
+    </div></div>
+    <div class="dt-group"><div class="lb">Dim:</div><div class="opt-chips" id="optDim">
+      ${dims.map((v,i)=>`<span class="ochip${i===d.dim?' cur':''}" data-d="${i}">${v}</span>`).join('')}
+    </div></div>
+    <div class="dt-group"><div class="lb">Material:</div><div class="opt-chips" id="optMat">
+      ${['Top-grain leather','Tech fabric','Solid wood'].slice(0,g.cat==='Sofas'?3:2).map((v,i)=>`<span class="ochip${i===d.mat?' cur':''}" data-t="${i}"><i class="dot" style="background:${SWHEX[palKey]}"></i>${v}</span>`).join('')}
+    </div></div>
+    <div class="qty-row"><span class="lb">QTY :</span>
+      <span class="stepper"><button data-qs="-1">−</button><input id="dtQty" value="${d.qty}" readonly><button data-qs="1">＋</button></span>
+      <span class="moq">#MOQ: ${g.moq}pcs</span></div>
+    <div class="dt-buy"><button class="btn-buy" id="btnBuy">Add to Shopping list</button>
+      <span class="dt-wish ${state.wish.has(g.code)?'on':''}" id="dtWish"><svg><use href="#i-heart"/></svg></span></div>`;
+  $$('#segMode button').forEach(b=>b.addEventListener('click',()=>{d.mode=+b.dataset.m;track('详情页','切换 Block/Custom',b.textContent);renderDetail()}));
+  $$('#segView button').forEach(b=>b.addEventListener('click',()=>{d.vmode=+b.dataset.v;track('详情页','切换 Variations/List',b.textContent);renderDetail()}));
+  $$('#optColor .ochip').forEach(c=>c.addEventListener('click',()=>{d.color=+c.dataset.c;track('详情页','选颜色',c.textContent.trim());renderDetail()}));
+  $$('#optDim .ochip').forEach(c=>c.addEventListener('click',()=>{d.dim=+c.dataset.d;track('详情页','选尺寸',c.textContent);renderDetail()}));
+  $$('#optMat .ochip').forEach(c=>c.addEventListener('click',()=>{d.mat=+c.dataset.t;track('详情页','选材质',c.textContent.trim());renderDetail()}));
+  $$('[data-qs]').forEach(b=>b.addEventListener('click',()=>{
+    d.qty=Math.max(1,d.qty+ +b.dataset.qs); $('#dtQty').value=d.qty}));
+  $('#btnBuy').addEventListener('click',()=>{addCart(g.code,'详情页',false,d.qty*g.moq)});
+  $('#dtWish').addEventListener('click',e=>toggleWish(g.code,e.currentTarget,'详情页'));
+  /* 标签页 */
+  const TABS=['Description','Size Chart','Material','Installation','Recommend'];
+  $('#dtTabs').innerHTML=TABS.map((t,i)=>`<span class="dt-tab${i===d.tab?' cur':''}" data-t="${i}">${t}</span>`).join('');
+  $$('#dtTabs .dt-tab').forEach(t=>t.addEventListener('click',()=>{d.tab=+t.dataset.t;track('详情页','切换标签',t.textContent);renderDetail()}));
+  renderDtPane(g,dims);
+  /* 场景图 */
+  const p=PAL[palKey]||PAL.beige;
+  const life=$('#dtLife');
+  life.style.background=`linear-gradient(${120+d.life*40}deg,${p[1]},${p[0]} 62%,${p[2]})`;
+  life.querySelector('.scene')?.remove();
+  const SCENES=[[g.icon,'p-coffee','p-lamp'],['p-lamp',g.icon,'p-shelf'],['p-mirror',g.icon,'p-stool']];
+  const sc=document.createElement('div'); sc.className='scene';
+  sc.innerHTML=SCENES[d.life].map((ic,i)=>`<svg viewBox="0 0 200 160" width="${i===1?300:150}" height="${i===1?240:120}" style="${palStyle(i===1?palKey:'cream')}"><use href="#${ic}"/></svg>`).join('');
+  life.appendChild(sc);
+  $('#lifeDots').innerHTML=[0,1,2].map(i=>`<i class="${i===d.life?'cur':''}" data-l="${i}"></i>`).join('');
+  $$('#lifeDots i').forEach(i=>i.addEventListener('click',()=>{d.life=+i.dataset.l;renderDetail()}));
+  /* 推荐三组 */
+  const others=g2=>g2.code!==g.code;
+  const fill=(id,arr)=>{const el=$(id);el.innerHTML=arr.slice(0,10).map(x=>cardHTML(x)).join('');bindCards(el,'详情页推荐')};
+  fill('#recSeries',GOODS.filter(x=>x.series===g.series&&others(x)));
+  fill('#recCat',GOODS.filter(x=>x.cat===g.cat&&others(x)));
+  fill('#recStyle',GOODS.filter(x=>x.space===g.space&&x.series!==g.series&&others(x)));
+}
+function renderDtPane(g,dims){
+  const d=state.dt, model='PS'+(100+g.idx%90);
+  const PANES=[
+  `<h4>Main Material</h4><p>Medium-thick top-grain leather; Larch; 7D PP cotton; Violet foam</p>
+   <h4>Product Selling Points</h4>
+   <div class="pts">
+     ·【Baby-grade Top Grain Leather】Skin-friendly and high-quality<br>
+     ·【7cm Higher Backrest】Relaxes head and neck freely<br>
+     ·【Sturdy Metal Bed Leg】Strong load bearing and stylish<br>
+     ·【Multiple Colors Available】Matches all home layouts
+   </div>
+   <h4 style="margin-top:22px">Attributes</h4>
+   <table class="attr-tb"><tbody>
+     <tr><td class="k">Brand</td><td>LINSY</td><td class="k">Category</td><td>${g.cat},Leather ${g.cat},${g.cat} &amp; Couches</td><td class="k">Model</td><td>${model}</td><td class="k">Items</td><td>${g.item}</td></tr>
+     <tr><td class="k">Suitable for</td><td>${g.space}s</td><td class="k">Discontinued or not</td><td>Current</td><td class="k">With Electric or not</td><td>No</td><td class="k">Electrical type</td><td></td></tr>
+     <tr><td class="k">Plug Spec</td><td></td><td class="k">Voltage Frequency</td><td></td><td class="k">Input Voltage</td><td></td><td class="k">Output Voltage</td><td></td></tr>
+   </tbody></table>`,
+  `<h4>Size Chart</h4><table class="attr-tb"><tbody>
+     ${dims.map((v,i)=>{const a=v.split('*');return `<tr><td class="k">Option ${i+1}</td><td>L ${a[0]}mm</td><td class="k">Width</td><td>W ${a[1]}mm</td><td class="k">Height</td><td>H ${a[2]}mm</td><td class="k">CBM</td><td>${(0.4+ (g.idx+i)%20*0.06).toFixed(3)}m³</td></tr>`}).join('')}
+   </tbody></table><p style="margin-top:14px">Packing: 1 carton / set · Loading reference: 20GP ≈ ${18+g.idx%20} sets, 40HQ ≈ ${44+g.idx%30} sets.</p>`,
+  `<h4>Material</h4><p>Frame: kiln-dried larch solid wood + plywood board.<br>Filling: 7D PP cotton with high-resilience violet foam (density 30kg/m³).<br>Cover: ${DT_COLORS[g.sw[d.color]]||''} top-grain leather, abrasion tested 30,000 cycles.<br>Legs: powder-coated metal, load bearing ≥ 250kg.</p>
+   <h4>Care</h4><p>Wipe with a soft dry cloth. Avoid direct sunlight and heat sources. Do not use alcohol-based cleaners.</p>`,
+  `<h4>Installation</h4><p>Estimated installation time: ${20+(g.idx%5)*10} minutes · Tools included in the carton.</p>
+   <div class="pts">1. Unpack and check parts against the packing list.<br>2. Attach the metal legs to the pre-drilled base plate.<br>3. Slot the backrest into the frame until it clicks.<br>4. Fix with the supplied bolts and tighten evenly.<br>5. Turn upright and adjust the levelling feet.</div>`,
+  `<h4>Recommend</h4><p>Frequently bought together by dealers in ${g.regions.map(r=>REGIONS.find(x=>x.short===r).name).join(' / ')}.</p>`
+  ];
+  $('#dtPane').innerHTML = PANES[d.tab];
+}
+
+/* ═══════════ 视图切换 / 导航 ═══════════ */
+function switchView(v){
+  $('#viewHome').classList.toggle('hidden',v!=='home');
+  $('#viewList').classList.toggle('hidden',v!=='list');
+  $('#viewDetail').classList.toggle('hidden',v!=='detail');
+  if(v!=='home') $('#gbFloat').classList.add('hide');
+  $$('nav.main a').forEach(a=>a.classList.toggle('active',
+    a.dataset.nav===v || (v==='detail'&&a.dataset.nav==='list')));
+  track(v==='home'?'首页':v==='list'?'列表页':'详情页','曝光','pageview');
+}
+function bindNav(){
+  $$('[data-nav]').forEach(el=>el.addEventListener('click',()=>{
+    const n=el.dataset.nav;
+    if(n==='home'){switchView('home');window.scrollTo({top:0})}
+    else if(n==='list') goList({src:'Nav'});
+    else if(n==='wish') toast('Demo：跳转 Wishlist（本期 Demo 范围外）');
+    else if(n==='po') openCart();
+    else toast('Demo：跳转 Account（本期 Demo 范围外）');
+  }));
+  $$('[data-go-list]').forEach(a=>a.addEventListener('click',()=>{
+    const p=JSON.parse(a.dataset.goList);track(p.src||'楼层','点击more');goList(p)}));
+  $('#cartMask').addEventListener('click',closeCart);
+  $('#cartClose').addEventListener('click',closeCart);
+  $('#cartGo').addEventListener('click',()=>{track('购物车','提交PO');toast('Demo：进入下单流程（ocshopping → contract 采购单）',true)});
+  $('#dtPrev').addEventListener('click',()=>{state.dt.img=(state.dt.img+5)%6;renderDetail()});
+  $('#dtNext').addEventListener('click',()=>{state.dt.img=(state.dt.img+1)%6;renderDetail()});
+  $$('[data-life]').forEach(b=>b.addEventListener('click',()=>{
+    state.dt.life=(state.dt.life+ +b.dataset.life+3)%3;renderDetail()}));
+  const inp=$('#searchInput');
+  const doSearch=kw=>{if(!kw)return;track('搜索','发起搜索',kw);goList({kw,src:'Search'});$('#searchSug').classList.remove('show')};
+  inp.addEventListener('focus',()=>$('#searchSug').classList.add('show'));
+  document.addEventListener('click',e=>{if(!e.target.closest('.searchbox'))$('#searchSug').classList.remove('show')});
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch(inp.value.trim())});
+  $('#searchBtn').addEventListener('click',()=>doSearch(inp.value.trim()));
+  $$('#searchSug .kw').forEach(k=>k.addEventListener('click',()=>{inp.value=k.textContent;doSearch(k.textContent)}));
+}
+
+/* ═══════════ 悬浮件 / 工具条 ═══════════ */
+function bindFloat(){
+  window.addEventListener('scroll',()=>{
+    $('#backTop').classList.toggle('show',scrollY>500);
+    if(!state.gbClosed && !$('#viewHome').classList.contains('hidden'))
+      $('#gbFloat').classList.toggle('hide',scrollY<400);
+  });
+  $('#backTop').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+  $('#gbFloatClose').addEventListener('click',()=>{state.gbClosed=true;$('#gbFloat').classList.add('hide');toast('拼单悬浮窗已关闭（楼层内仍可参团）')});
+}
+function bindDemoBar(){
+  $('#swAnno').addEventListener('click',()=>{$('#swAnno').classList.toggle('on');document.body.classList.toggle('anno')});
+  $('#btnReq').addEventListener('click',()=>{renderReq();$('#reqMask').classList.add('show')});
+  $('#reqClose').addEventListener('click',()=>$('#reqMask').classList.remove('show'));
+  $('#reqMask').addEventListener('click',e=>{if(e.target.id==='reqMask')$('#reqMask').classList.remove('show')});
+}
+function renderReq(){
+  const tag=t=>t==='n'?'<span class="rq-tag n">新增</span>':t==='u'?'<span class="rq-tag u">优化调整</span>':'<span class="rq-tag k">1:1 复刻</span>';
+  $('#reqBody').innerHTML=`<p style="font-size:12.5px;color:var(--ink2);margin-top:12px;line-height:1.75">
+    依据业务侧《商城端需求.xlsx》（需求2 + 商城规划首页两个 Sheet）梳理，结合 BPS 现有代码（bff-market 商城端 BFF）的功能与交互逻辑输出。
+    页面样式按 <b>linsydirect.com / b2b-cli-pc</b> 真实页面复刻：未提优化的部分（页头页尾、All Categories 胶囊行、商品卡、分页器、商品详情页全部结构）保持 1:1；
+    优化部分套用同一套设计变量插入。「系统承接」列标注了现有可复用的服务能力与需新建的字段 / 接口，供 IT 侧评估。</p>
+  <table class="req-tb"><thead><tr><th style="width:104px">楼层 / 模块</th><th style="width:70px">类型</th><th>业务需求要点</th><th>Demo 实现 &amp; 系统承接</th></tr></thead><tbody>
+  ${REQS.map(r=>`<tr><td><b>${r.m}</b></td><td>${tag(r.t)}</td><td>${r.req}</td><td>${r.impl}<br><span class="api">▸ ${r.api}</span></td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+/* ═══════════ 初始化 ═══════════ */
+renderNotice(); renderBanner(); renderCatNav(); renderCatRec(); renderSeries();
+renderStrip('#hotTrack',GOODS.filter(g=>g.flags.includes('hot')).sort((a,b)=>b.sales6m-a.sales6m).slice(0,8),'爆款推荐',{showSales:true});
+renderStrip('#newTrack',GOODS.filter(g=>g.flags.includes('new')).sort((a,b)=>b.hdate.localeCompare(a.hdate)).slice(0,8),'新品推荐');
+renderCustom();
+renderStrip('#saleTrack',GOODS.filter(g=>g.flags.includes('sale')),'特价产品');
+initHScroll(); renderRegion(); bindNav(); bindFloat(); bindDemoBar();
+track('首页','曝光','pageview');
+setTimeout(()=>toast('💡 提示：点任意商品可进商品详情页；顶部「需求标注模式」可查看每个楼层的优化说明'),900);
+</script>
+</body>
+</html>
