@@ -798,7 +798,7 @@ body.anno .anno-chip{display:inline-flex}
     <div class="opt-block list-cat-nav">
       <span class="opt-flag">⑪ 优化新增</span>
       <div class="lc-row" id="listCatTabs"></div>
-      <div style="padding:0 0 10px"><span class="anno-chip">⑪调整<span class="tip"><b>商品列表页（二跳页）优化</b><br>1) 品类分类导航上移；2) 筛选入口与筛选栏置于商品区左侧，标签 / 价格 / 尺寸 / 材质 / 颜色点击标题展开并支持上下滚动；3) 已选条件可逐个清除；4) 排序显示新品、爆款、特价、定制。<span class="api">ES find.json：标签、价格、尺寸、材质、颜色过滤 + 业务标签排序</span></span></span></div>
+      <div style="padding:0 0 10px"><span class="anno-chip">⑪调整<span class="tip"><b>商品列表页（二跳页）优化</b><br>1) 品类分类导航上移；2) 筛选入口与筛选栏置于商品区左侧，标签 / 价格 / 尺寸 / 材质 / 颜色点击标题展开并支持上下滚动；3) 已选条件可逐个清除；4) 移除列表页顶部排序模块。<span class="api">ES find.json：标签、价格、尺寸、材质、颜色过滤</span></span></span></div>
     </div>
 
     <div class="list-workbench">
@@ -1034,7 +1034,7 @@ const REQS = [
   {m:'⑧ 大区-5', t:'n', req:'新增区域打标字段，按市场划分商品专区，3×2 分布产品图，more/图片跳对应列表页', impl:'SEA / ANZ / LATAM 三专区 Tab 切换，3×2 商品矩阵，卡片露出区域标；二跳列表页携带大区筛选', api:'商品域新增 regionTag 字段 → ES 同步过滤'},
   {m:'⑨ 定制产品-6', t:'n', req:'横向展示 5 款并显示拼单进度；抓取客户加购意向清单确定展示逻辑；楼层支持悬浮或常驻可见', impl:'5 款定制品带拼单进度条（10%~90%）+ 一键参团；右下角悬浮窗常驻露出 TOP3 拼单', api:'大数据 recSimInterestCart（加购兴趣）+ promotion 拼团 + ocshopping'},
   {m:'⑩ 特价产品-7', t:'n', req:'滞销品清仓专区；运营端新增维护入口，手动选择划定产品池', impl:'横滑特价专区，原价划线 / 特价红字对比 + SALE 角标', api:'运营端选品池 → tginfoMenu 栏目内容 / saleFlag 打标'},
-  {m:'⑪ 商品列表页', t:'u', req:'列表页品类导航上移；筛选入口放到左侧，筛选栏支持上下滚动；排序显示新品、爆款、特价、定制', impl:'移除列表页顶部面包屑与图片型空间导航；品类导航紧贴页头；左侧折叠筛选支持独立纵向滚动；四个业务标签可一键排序', api:'ES find.json 标签、价格、尺寸、材质、颜色过滤 + new/hot/sale/custom 业务标签排序'},
+  {m:'⑪ 商品列表页', t:'u', req:'列表页品类导航上移；筛选入口放到左侧，筛选栏支持上下滚动；移除顶部排序模块', impl:'移除列表页顶部面包屑、图片型空间导航及排序选项；品类导航紧贴页头；左侧折叠筛选支持独立纵向滚动', api:'ES find.json 标签、价格、尺寸、材质、颜色过滤'},
   {m:'⑫ 商品详情页', t:'k', req:'（未提优化，1:1 复刻）', impl:'缩略图列 + 主图轮播、Block/Custom 与 Variations/List Mode 分段控件、Color/Dim/Material 选择、QTY 步进器与 MOQ、Add to Shopping list、Description/Size Chart/Material/Installation/Recommend 标签页、Attributes 表格、场景大图轮播、Same Series/Category/Style 三组推荐', api:'/web/rs/resourceGoods · getResourceGoods + RsSku 规格'},
   {m:'⑬ 数据埋点', t:'n', req:'增设埋点，实现点击率与转化率等数据监测分析', impl:'全楼层交互均已挂埋点事件（楼层曝光 / 点击 / 加购 / 参团 / 筛选 / 选规格，楼层×商品维度，静默上报），控制台可查看事件流', api:'前端埋点 SDK → FlowData / 大数据平台回流分析'}
 ];
@@ -1047,7 +1047,7 @@ const byCode = c => GOODS.find(g => g.code === c);
 const palStyle = k => {const p=PAL[k]||PAL.beige;return `--c1:${p[0]};--c2:${p[1]};--c3:${p[2]}`};
 const state = {
   cart:new Map(), wish:new Set(),
-  filters:{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,src:null,chip:null,sort:'new',sortDir:-1,page:1},
+  filters:{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,src:null,chip:null,sort:'default',sortDir:-1,page:1},
   filterSidebarOpen:false,
   filterGroups:{tag:true,price:false,size:false,material:false,color:false},
   bannerIdx:0, noticeIdx:0, heroIdx:0, regionIdx:0, seriesIdx:0, catTab:0,
@@ -1337,7 +1337,7 @@ function closeCart(){$('#cartMask').classList.remove('show');$('#cartDrawer').cl
 /* ═══════════ 商品列表页 ═══════════ */
 function goList(p={}){
   const f=state.filters;
-  Object.assign(f,{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,src:null,chip:null,sort:'new',sortDir:-1,page:1});
+  Object.assign(f,{cat:'All',space:null,series:null,region:null,price:null,priceMin:null,priceMax:null,size:null,sizeMin:null,sizeMax:null,material:null,color:null,flag:null,kw:null,src:null,chip:null,sort:'default',sortDir:-1,page:1});
   if(p.cat) f.cat=p.cat;
   ['space','series','region','flag','kw','src','chip'].forEach(k=>{if(p[k])f[k]=p[k]});
   if(p.space) f.chip=p.space;
@@ -1426,18 +1426,11 @@ function renderList(){
   };
   bindRange('price','#priceMinRange','#priceMaxRange','#priceMinInput','#priceMaxInput');
   bindRange('size','#sizeMinRange','#sizeMaxRange','#sizeMinInput','#sizeMaxInput');
-  /* 排序 */
-  const sorts=[['new','新品'],['hot','爆款'],['sale','特价'],['custom','定制']];
   const list=filteredGoods();
   $('#sortbar').innerHTML=`<button class="btn-filter${state.filterSidebarOpen?' on':''}" id="btnFilter" type="button" aria-expanded="${state.filterSidebarOpen}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
         筛选${fn?`<b>${fn}</b>`:''}<i class="caret">${state.filterSidebarOpen?'◀':'▶'}</i></button>`+
-    '<span class="lb" style="width:52px;flex-shrink:0;color:var(--hint);font-size:12px">排序</span>'+ 
-    sorts.map(([k,n])=>`<span class="s-op${f.sort===k?' cur':''}" data-s="${k}">${n}</span>`).join('')+
     `<span class="cnt"><b>${list.length}</b> products</span>`;
-  $$('#sortbar .s-op').forEach(s=>s.addEventListener('click',()=>{
-    const k=s.dataset.s;
-    f.sort=k;f.page=1;track('列表页','排序',k);renderList()}));
   $('#btnFilter').addEventListener('click',()=>{
     state.filterSidebarOpen=!state.filterSidebarOpen;
     track('列表页','筛选侧栏',state.filterSidebarOpen?'展出':'收起');renderList()});
