@@ -69,6 +69,15 @@ nav.main a{padding:6px 19px;font-size:14.5px;color:#4A4A4A;cursor:pointer;transi
 nav.main a:hover{color:var(--teal-deep)}
 nav.main a.active{color:#1A1A1A;font-weight:600}
 .searchbox{margin-left:auto;width:270px;position:relative;flex-shrink:0}
+.notice-bar{height:42px;background:#E7FAF7;border-bottom:1px solid #BDEFE8;color:#167E77;display:flex;align-items:center}
+.notice-inner{width:1400px;max-width:calc(100% - 40px);margin:0 auto;display:flex;align-items:center;gap:11px;min-width:0}
+.notice-title{font-size:12px;font-weight:700;letter-spacing:.4px;white-space:nowrap;color:#108F86}
+.notice-tag{font-size:11px;font-weight:600;padding:3px 10px;background:#CEF3EE;border-radius:12px;white-space:nowrap}
+.notice-viewport{height:26px;line-height:26px;overflow:hidden;position:relative;flex:1;min-width:0}
+.notice-item{position:absolute;inset:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:0;transform:translateY(12px);transition:opacity .35s ease,transform .35s ease;font-size:13px;cursor:pointer}
+.notice-item.cur{opacity:1;transform:translateY(0)}
+.notice-close{border:0;background:transparent;color:#5AB9AF;font-size:22px;line-height:1;cursor:pointer;padding:2px 0 2px 9px}
+.notice-close:hover{color:#168D84}
 .searchbox .inp{display:flex;align-items:center;border:1px solid #E2E2E2;border-radius:19px;background:#fff;transition:.2s;overflow:hidden}
 .searchbox .inp:focus-within{border-color:var(--mint)}
 .searchbox input{flex:1;border:none;outline:none;padding:8px 18px;font-size:12.5px;background:transparent;color:var(--ink)}
@@ -690,6 +699,16 @@ body.anno .anno-chip{display:inline-flex}
 <!-- ══════════════ 首页 ══════════════ -->
 <div id="viewHome">
 
+  <!-- ① 公告文字轮播 -->
+  <section class="notice-bar" id="noticeBar" aria-label="Notice">
+    <div class="notice-inner">
+      <span class="notice-title">🔊 <span id="noticeTitle">NOTICE</span></span>
+      <span class="notice-tag" id="noticeTag"></span>
+      <div class="notice-viewport" id="noticeTrack"></div>
+      <button class="notice-close" id="noticeClose" type="button" aria-label="Close notice">×</button>
+    </div>
+  </section>
+
   <!-- ② 轮播海报 -->
   <section class="floor" id="bannerFloor" data-floor="banner" style="margin-top:0">
     <div class="banner" id="banner">
@@ -1024,10 +1043,10 @@ const GOODS = RAW.map((r,i)=>({
   heightM:+(0.5+((i*3)%17)/10).toFixed(1)
 }));
 const NOTICES = [
-  {tag:'Event', txt:'2026 Autumn GTM Global Launch goes live Sept 1 — dealer pre-registration is now open'},
-  {tag:'Logistics', txt:'SEA route shipping space is tight from August — place orders 14 days ahead to lock containers'},
-  {tag:'System', txt:'Mall maintenance on Aug 2, 02:00–04:00 (GMT+8) — ordering will be briefly paused'},
-  {tag:'Policy', txt:'Tariff adjustment for some LATAM categories — FOB prices are for reference, final quote via inquiry'}
+  {tag:{en:'Event',zh:'活动'}, txt:{en:'2026 Autumn GTM Global Launch goes live Sept 1 — dealer pre-registration is now open',zh:'2026 秋季 GTM 全球发布会将于 9 月 1 日开启，经销商预报名现已开放'}},
+  {tag:{en:'Logistics',zh:'物流'}, txt:{en:'SEA route shipping space is tight from August — place orders 14 days ahead to lock containers',zh:'8 月起东南亚航线舱位紧张，请至少提前 14 天下单以锁定集装箱舱位'}},
+  {tag:{en:'System',zh:'系统'}, txt:{en:'Mall maintenance on Aug 2, 02:00–04:00 (GMT+8) — ordering will be briefly paused',zh:'商城将于 8 月 2 日 02:00–04:00（GMT+8）进行维护，期间下单服务将短暂停用'}},
+  {tag:{en:'Policy',zh:'政策'}, txt:{en:'Tariff adjustment for some LATAM categories — FOB prices are for reference, final quote via inquiry',zh:'部分拉美品类关税调整，FOB 价格仅供参考，最终报价请以询盘结果为准'}}
 ];
 const BANNERS = [
   {type:'ciff', bg:'linear-gradient(102deg,#0A6B63 0%,#1CA99B 45%,#3FCFBF 78%,#7EE4D6 100%)'},
@@ -1099,7 +1118,7 @@ function applyLocale(refresh=true){
   $$('#langMenu [data-locale]').forEach(b=>b.classList.toggle('cur',b.dataset.locale===state.locale));
   $$('#currencyMenu [data-currency]').forEach(b=>b.classList.toggle('cur',b.dataset.currency===state.currency));
   if(!refresh)return;
-  renderCatNav(); renderCatRec(); renderSeries();
+  renderNotice(); renderCatNav(); renderCatRec(); renderSeries();
   renderStrip('#hotTrack',GOODS.filter(g=>g.flags.includes('hot')).sort((a,b)=>b.sales6m-a.sales6m).slice(0,8),state.locale==='zh'?'爆款推荐':'Best Sellers',{showSales:true});
   renderStrip('#newTrack',GOODS.filter(g=>g.flags.includes('new')).sort((a,b)=>b.hdate.localeCompare(a.hdate)).slice(0,8),state.locale==='zh'?'新品推荐':'New Arrivals');
   renderRegion(); renderCustom(); renderStrip('#saleTrack',GOODS.filter(g=>g.flags.includes('sale')),state.locale==='zh'?'特价产品':'Clearance Deals');
@@ -1179,6 +1198,31 @@ function toggleWish(code, el, from){
 }
 
 /* ═══════════ ① 通知栏 ═══════════ */
+let noticeTimer;
+function renderNotice(){
+  const noticeTrack=$('#noticeTrack');
+  if(!noticeTrack)return;
+  $('#noticeTitle').textContent=state.locale==='zh'?'公告':'NOTICE';
+  state.noticeIdx%=NOTICES.length;
+  noticeTrack.innerHTML=NOTICES.map((n,i)=>`<span class="notice-item${i===state.noticeIdx?' cur':''}" data-ni="${i}">${n.txt[state.locale]}</span>`).join('');
+  $('#noticeTag').textContent=NOTICES[state.noticeIdx].tag[state.locale];
+  $$('#noticeTrack .notice-item').forEach(el=>el.addEventListener('click',()=>{
+    track('公告文字轮播','点击公告',NOTICES[+el.dataset.ni].tag[state.locale]);
+    toast(state.locale==='zh'?'公告详情为演示内容':'Notice details are for demo');
+  }));
+  if(!$('#noticeClose').dataset.bound){
+    $('#noticeClose').dataset.bound='1';
+    $('#noticeClose').addEventListener('click',()=>{clearInterval(noticeTimer);$('#noticeBar').style.display='none';track('公告文字轮播','关闭公告')});
+  }
+  startNoticeAuto();
+}
+function setNotice(i){
+  state.noticeIdx=(i+NOTICES.length)%NOTICES.length;
+  $$('#noticeTrack .notice-item').forEach((el,j)=>el.classList.toggle('cur',j===state.noticeIdx));
+  $('#noticeTag').textContent=NOTICES[state.noticeIdx].tag[state.locale];
+}
+function startNoticeAuto(){clearInterval(noticeTimer);noticeTimer=setInterval(()=>setNotice(state.noticeIdx+1),4200)}
+
 /* ═══════════ ② 轮播 ═══════════ */
 let bannerTimer;
 function slideHTML(s){
@@ -1716,7 +1760,7 @@ function renderReq(){
 }
 
 /* ═══════════ 初始化 ═══════════ */
-renderBanner(); renderCatNav(); renderCatRec(); renderSeries();
+renderNotice(); renderBanner(); renderCatNav(); renderCatRec(); renderSeries();
 renderStrip('#hotTrack',GOODS.filter(g=>g.flags.includes('hot')).sort((a,b)=>b.sales6m-a.sales6m).slice(0,8),'爆款推荐',{showSales:true});
 renderStrip('#newTrack',GOODS.filter(g=>g.flags.includes('new')).sort((a,b)=>b.hdate.localeCompare(a.hdate)).slice(0,8),'新品推荐');
 renderCustom();
